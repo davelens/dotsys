@@ -6,8 +6,7 @@ set -e
 
 echo "==> Configuring swtchr..."
 
-mkdir -p "$XDG_CONFIG_HOME/systemd/user"
-ln -sf "$DOTFILES_REPO_HOME/config/arch/systemd/swtchrd.service" \
+ln -sf "$DOTSYS_REPO_HOME/arch/systemd/swtchrd.service" \
   "$XDG_CONFIG_HOME/systemd/user/"
 
 sudo pacman -S --needed --noconfirm gtk4 gtk4-layer-shell
