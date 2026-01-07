@@ -13,3 +13,6 @@ sudo pacman -S --needed --noconfirm \
 
 # Fingerprint auth with swaylock.
 sudo cp "$DOTFILES_REPO_HOME/config/arch/swaylock/pam-d.config" /etc/pam.d/swaylock
+
+mkdir -p ~/Pictures/wallpapers
+cp wallpapers/* ~/Pictures/wallpapers/
