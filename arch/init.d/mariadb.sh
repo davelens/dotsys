@@ -6,7 +6,7 @@ MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-root}"
 if command -v mariadb >/dev/null; then
   echo -e 'MariaDB is already installed. Run this to remove it:\n'
   echo '  utility arch mariadb-uninstall'
-  exit 1
+  exit
 fi
 
 echo "Installing MariaDB LTS..."
