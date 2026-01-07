@@ -7,6 +7,8 @@ export DOTSYS_REPO_HOME
 "$DOTSYS_REPO_HOME/arch/preflight.sh"
 utility arch bundle --update
 
+mkdir -p "$XDG_CONFIG_HOME/systemd/user"
+
 "$DOTSYS_REPO_HOME/shared/gnupg/init.sh"
 "$DOTSYS_REPO_HOME/shared/mise/init.sh"
 "$DOTSYS_REPO_HOME/shared/cargo/init.sh"
