@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-source "$(dirname "${BASH_SOURCE[0]}")"/helpers.sh
+source "$DOTSYS_REPO_HOME/helpers.sh"
 
 main() {
   if ! command -v cargo &>/dev/null; then
