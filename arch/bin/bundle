@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+# This commmand is a convenience wrapper around the Arch packages init script.
+
+"$DOTSYS_REPO_HOME/arch/packages/init.sh" "$@"

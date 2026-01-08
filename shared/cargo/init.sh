@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
-read_packages() {
-  grep -v '^\s*#' "$1" | grep -v '^\s*$' | awk '{print $1}'
-}
+source "$(dirname "${BASH_SOURCE[0]}")"/helpers.sh
 
 main() {
   if ! command -v cargo &>/dev/null; then
