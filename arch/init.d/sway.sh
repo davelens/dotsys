@@ -16,4 +16,4 @@ sudo cp "$DOTFILES_REPO_HOME/config/arch/swaylock/pam-d.config" /etc/pam.d/swayl
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p "$HOME/Pictures"
-cp -r "$SCRIPT_DIR/wallpapers" ~/Pictures/
+cp -r "$SCRIPT_DIR/../../wallpapers" ~/Pictures/
