@@ -3,5 +3,5 @@
 com.bitwarden.desktop               # Password manager (GUI)
 com.discordapp.Discord              # Chat application
 com.valvesoftware.Steam             # Gaming platform
-org.mozilla.firefox                 # Web browser
+io.gitlab.librewolf-community       # Web browser
 org.videolan.VLC                    # Media player

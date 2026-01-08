@@ -13,7 +13,7 @@ cask "alfred"                         # App launcher for macos
 cask "bitwarden"                      # Password manager
 cask "cloudflare-warp"                # DNS resolver for speed & better privacy
 cask "discord"                        # IM for communities
-cask "firefox"                        # Still best in spite of privacy concerns
+cask "librewolf"                      # Browser, better privacy than Firefox
 cask "homerow"                        # Vimium-esque navigation, but everywhere
 cask "imageoptim"                     # GUI to bulk convert image formats
 cask "karabiner-elements"             # Low-effort keyboard customizer
