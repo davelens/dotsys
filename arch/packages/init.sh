@@ -35,9 +35,9 @@ main() {
   fi
 
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  "$SCRIPT_DIR/../../bin/pacman" --install-from-file "$SCRIPT_DIR/pacman.txt"
-  "$SCRIPT_DIR/../../bin/paru" --install-from-file "$SCRIPT_DIR/aur.txt"
-  "$SCRIPT_DIR/../../bin/flatpak" --install-from-file "$SCRIPT_DIR/flatpak.txt"
+  "$SCRIPT_DIR/../bin/pacman" --install-from-file "$SCRIPT_DIR/pacman.txt"
+  "$SCRIPT_DIR/../bin/paru" --install-from-file "$SCRIPT_DIR/aur.txt"
+  "$SCRIPT_DIR/../bin/flatpak" --install-from-file "$SCRIPT_DIR/flatpak.txt"
 }
 
 main "$@"
