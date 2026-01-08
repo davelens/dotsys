@@ -6,6 +6,9 @@ export DOTSYS_REPO_HOME
 
 mkdir -p "$XDG_CONFIG_HOME/systemd/user"
 
+ln -s "$DOTSYS_REPO_HOME/arch/systemd/bluetooth-resume.service" /etc/systemd/system/
+sudo systemctl enable bluetooth-resume.service
+
 "$DOTSYS_REPO_HOME/arch/preflight.sh"
 "$DOTSYS_REPO_HOME/shared/gnupg/init.sh"
 "$DOTSYS_REPO_HOME/shared/mise/init.sh"
