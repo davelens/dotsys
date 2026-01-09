@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Enable lingering so user services start at boot (before login)
 sudo loginctl enable-linger "$USER"
 
@@ -17,12 +19,9 @@ echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinpu
   sudo tee /etc/udev/rules.d/99-input.rules >/dev/null
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
-ln -sf "$DOTSYS_REPO_HOME/arch/systemd/kanata.service" \
-  "$XDG_CONFIG_HOME/systemd/user/"
-
 paru -S --needed --noconfirm kanata-bin
 systemctl --user daemon-reload
-systemctl --user enable kanata
+systemctl --user enable "$SCRIPT_DIR/../systemd/kanata.service"
 systemctl --user restart kanata
 
 # When you press capslock while Kanata is starting, you might end up with an
