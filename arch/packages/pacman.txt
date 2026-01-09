@@ -9,6 +9,7 @@ efibootmgr                          # EFI boot manager
 grub                                # Bootloader
 htop                                # Process viewer
 inotify-tools                       # File change listener used by Ex/Phoenix
+keychain                            # ssh-agent/gpg-agent key manager
 libpulse                            # PulseAudio client library
 linux                               # Linux kernel
 linux-firmware                      # Firmware files for Linux
