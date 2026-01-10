@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+SHARE="${1-storage}"
+NAS_IP="192.168.0.184"
+
+if [[ "$1" == "-u" ]]; then
+	SHARE="${2-storage}"
+	gio mount -u "smb://$NAS_IP/$SHARE"
+	rm -f ~/Network/alexandria
+	exit 0
+fi
+
+if ! command -v gio >/dev/null; then
+	sudo pacman -S --needed --noconfirm gvfs-smb
+fi
+
+gio mount "smb://$NAS_IP/$SHARE"
+[[ ! -d $HOME/Network ]] && mkdir "$HOME/Network"
+ln -sf "$XDG_RUNTIME_DIR/gvfs/smb-share:server=$NAS_IP,share=$SHARE" ~/Network/alexandria
