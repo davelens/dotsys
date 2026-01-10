@@ -3,7 +3,7 @@ Description=Kanata keyboard remapper
 Documentation=https://github.com/jtroo/kanata
 
 [Service]
-ExecStart=/usr/bin/kanata --cfg %h/.config/kanata/kanata.kbd
+ExecStart=/usr/bin/kanata --cfg %h/.config/kanata/internal.kbd --cfg %h/.config/kanata/external.kbd
 Restart=on-failure
 RestartSec=3
 
