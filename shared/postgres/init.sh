@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Ensure mise-installed binaries are in PATH
+eval "$(mise activate bash 2>/dev/null || true)"
+
 PGDATA="${PGDATA:-$HOME/.local/share/postgres/data}"
 
 # Initialize PostgreSQL data directory if it doesn't exist
