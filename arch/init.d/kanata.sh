@@ -22,7 +22,9 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 paru -S --needed --noconfirm kanata-bin
 systemctl --user daemon-reload
 systemctl --user enable "$SCRIPT_DIR/../systemd/kanata.service"
+systemctl --user enable "$SCRIPT_DIR/../systemd/kanata-external.service"
 systemctl --user restart kanata
+systemctl --user restart kanata-external
 
 # When you press capslock while Kanata is starting, you might end up with an
 # active capslock and no conventional way to turn it off.

@@ -1,9 +1,9 @@
 [Unit]
-Description=Kanata keyboard remapper
+Description=Kanata keyboard remapper (external keyboards)
 Documentation=https://github.com/jtroo/kanata
 
 [Service]
-ExecStart=/usr/bin/kanata --cfg %h/.config/kanata/internal.kbd
+ExecStart=/usr/bin/kanata --cfg %h/.config/kanata/external.kbd
 Restart=on-failure
 RestartSec=3
 
