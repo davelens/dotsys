@@ -5,13 +5,19 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "==> Installing Waybar..."
 
-sudo pacman -S --needed --noconfirm waybar
+# bluetoothctl, nmcli, checkupdates,...
+sudo pacman -S --needed --noconfirm waybar \
+  bluez bluez-utils \
+  brightnessctl \
+  fzf \
+  networkmanager \
+  pacman-contrib \
+  pipewire-pulse \
+  otf-commit-mono-nerd
 
-# TODO: Add Mechabar as git submodule instead? https://github.com/Sejjy/MechaBar
-
-# Run MechaBar's install script (makes scripts executable, installs dependencies)
-"$XDG_CONFIG_HOME/waybar/install.sh"
-
-# Enable and start the service
 systemctl --user daemon-reload
 systemctl --user enable "$SCRIPT_DIR/../systemd/waybar.service"
+
+pgrep waybar >/dev/null && pkill waybar
+waybar &>/dev/null &
+disown
