@@ -10,4 +10,5 @@ neofetch-git                        # System information tool
 opencode-bin                        # TUI coding agent
 piavpn-bin                          # Private Internet Access client
 pipes.sh                            # Terminal screensaver, win95 style
+swaylock-effects                    # More options for the swaylock lockscreen
 watson                              # Time registration
