@@ -21,7 +21,7 @@ sudo systemctl enable bluetooth-resume.service
 "$DOTSYS_REPO_HOME/arch/init.d/albert.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/mariadb.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/power-profiles.sh"
-"$DOTSYS_REPO_HOME/shared/postgres/init.sh"
+# "$DOTSYS_REPO_HOME/shared/postgres/init.sh"
 # NOTE: This is disabled for now until I can properly "reset" this to
 # the default state of things. It should by-and-large work though.
 # "$DOTSYS_REPO_HOME/arch/init.d/fingerprint-auth.sh"
