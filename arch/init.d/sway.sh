@@ -4,12 +4,15 @@ set -e
 echo "==> Installing Sway..."
 
 sudo pacman -S --needed --noconfirm \
-  sway sway-contrib swaybg swayidle swaylock \
+  sway sway-contrib swaybg swayidle \
   mako \
   libpulse \
   grim \
   rofi-wayland \
   wev
+
+# Includes the `swaylock` binary.
+paru -S swaylock-effects
 
 # Fingerprint auth with swaylock.
 sudo cp "$DOTFILES_REPO_HOME/config/arch/swaylock/pam-d.config" /etc/pam.d/swaylock
