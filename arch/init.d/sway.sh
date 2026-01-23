@@ -12,7 +12,7 @@ sudo pacman -S --needed --noconfirm \
   wev
 
 # Includes the `swaylock` binary.
-paru -S swaylock-effects
+paru -S --needed --noconfirm swaylock-effects
 
 # Fingerprint auth with swaylock.
 sudo cp "$DOTFILES_REPO_HOME/config/arch/swaylock/pam-d.config" /etc/pam.d/swaylock
