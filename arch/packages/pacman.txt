@@ -39,6 +39,7 @@ powertop                            # Power consumption monitor
 radeontop                           # AMD GPU sensor monitor
 rsync                               # Local and remote file copying
 seahorse                            # GUI SSH/GNUPG key manager
+slurp                               # Region selection in Wayland compositors
 smartmontools                       # S.M.A.R.T. disk monitoring
 snapshot                            # macos's Photo Booth, but for Linux
 sof-firmware                        # Sound Open Firmware
