@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Simple PostgreSQL client with autocompletion
+sudo pacman -S --noconfirm --needed pgcli
+
 # Ensure mise-installed binaries are in PATH
 eval "$(mise activate bash 2>/dev/null || true)"
 

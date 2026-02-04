@@ -11,3 +11,4 @@ opencode-bin                        # TUI coding agent
 piavpn-bin                          # Private Internet Access client
 pipes.sh                            # Terminal screensaver, win95 style
 watson                              # Time registration
+wezterm-git                         # Terminal emulator

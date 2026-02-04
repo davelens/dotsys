@@ -4,28 +4,46 @@ base                                # Minimal base system
 base-devel                          # Development tools (make, gcc, etc.)
 bluez                               # Bluetooth protocol stack
 bluez-utils                         # Bluetooth utilities
+brightnessctl                       # Display brightness control tool
 cliphist                            # Clipboard manager for Sway+rofi
+duf                                 # Disk usage monitor
+dust                                # Folder size monitor
 efibootmgr                          # EFI boot manager
+fastfetch                           # System info (but fast)
 grub                                # Bootloader
 htop                                # Process viewer
 inotify-tools                       # File change listener used by Ex/Phoenix
+inxi                                # System info (queryable)
+kanshi                              # Wayland display config tool
 keychain                            # ssh-agent/gpg-agent key manager
 libpulse                            # PulseAudio client library
 linux                               # Linux kernel
 linux-firmware                      # Firmware files for Linux
 man-db                              # Manuals for CLI tools via `man`
+matugen                             # Material You color generator
 neovim                              # My home away from home
 network-manager-applet              # NetworkManager applet
 networkmanager                      # Network connection manager
+nmap                                # network scanner
+pavucontrol                         # PulseAudio volume control tool
 pipewire                            # Audio/video server
 pipewire-alsa                       # ALSA support for PipeWire
 pipewire-jack                       # JACK support for PipeWire
 pipewire-pulse                      # PulseAudio replacement
+power-profiles-daemon               # Power management
+powertop                            # Power consumption monitor
+radeontop                           # AMD GPU sensor monitor
+rsync                               # Local and remote file copying
 smartmontools                       # S.M.A.R.T. disk monitoring
+snapshot                            # macos's Photo Booth, but for Linux
 sof-firmware                        # Sound Open Firmware
+sushi                               # Fast file, image, and video viewer
+tree                                # Simple nested folder tree visualizer
+unzip                               # What it says on the tin
+virt-manager                        # VM Manager
 vulkan-nouveau                      # Nouveau Vulkan driver
 vulkan-radeon                       # AMD Vulkan driver
-wezterm                             # Terminal emulator
+wev                                 # Wayland event monitor
 wireguard-tools                     # WireGuard protocol tools (for PIA)
 wireless_tools                      # Wireless network tools
 wireplumber                         # PipeWire session manager
@@ -36,6 +54,7 @@ xf86-video-ati                      # ATI GPU driver
 xf86-video-nouveau                  # Nouveau GPU driver
 xorg-server                         # X.Org display server
 xorg-xinit                          # X.Org initialization
+xorg-xrandr                         # Display configuration tool
 zram-generator                      # Systemd zram generator
 
 # Cross-platform packages (from Brewfile.default)
@@ -94,7 +113,7 @@ wget                                # Network downloader
 # duf                                 # Like df, but humanized
 # dust                                # Like du, but humanized
 # entr                                # File change listener
-# fastfetch                           # System information tool
+# fastfetch                           # System information & bragging tool
 # fd                                  # File search
 # fdupes                              # Duplicate file finder
 # fish                                # Friendly interactive shell
