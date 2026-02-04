@@ -18,7 +18,6 @@ sudo systemctl enable bluetooth-resume.service
 "$DOTSYS_REPO_HOME/arch/init.d/waybar.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/alt-tab.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/kanata.sh"
-"$DOTSYS_REPO_HOME/arch/init.d/albert.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/mariadb.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/power-profiles.sh"
 # "$DOTSYS_REPO_HOME/shared/postgres/init.sh"
