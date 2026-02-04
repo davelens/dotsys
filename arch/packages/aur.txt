@@ -4,6 +4,7 @@
 
 annotator                           # Image annotation tool
 clipboard-bin                       # Clipboard manager
+firefox-bin                         # Everyone's favourite fox
 jqp-bin                             # Interactive jq playground
 kanata-bin                          # Cross-platform keyboard remapper
 lazysql-bin                         # TUI for SQL databases
