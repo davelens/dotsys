@@ -2,7 +2,12 @@
 set -e
 
 echo "==> Installing QEMU/KVM and VM management tools..."
-sudo pacman -S --needed --noconfirm qemu-full virt-manager libvirt dmidecode
+sudo pacman -S --needed --noconfirm \
+  qemu-full \
+  virt-manager \
+  libvirt \
+  dmidecode \
+  dnsmasq
 
 echo "==> Enabling libvirtd service..."
 sudo systemctl enable --now libvirtd

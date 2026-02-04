@@ -1,17 +1,20 @@
 # Arch-specific system packages
 amd-ucode                           # AMD CPU microcode
+asciinema                           # Terminal session recorder
 base                                # Minimal base system
 base-devel                          # Development tools (make, gcc, etc.)
 bluez                               # Bluetooth protocol stack
 bluez-utils                         # Bluetooth utilities
 brightnessctl                       # Display brightness control tool
+btop                                # Process viewer
+cava                                # Audio visualizer
 cliphist                            # Clipboard manager for Sway+rofi
+cmatrix                             # Nostalgia amplification tool
 duf                                 # Disk usage monitor
 dust                                # Folder size monitor
 efibootmgr                          # EFI boot manager
 fastfetch                           # System info (but fast)
 grub                                # Bootloader
-htop                                # Process viewer
 inotify-tools                       # File change listener used by Ex/Phoenix
 inxi                                # System info (queryable)
 kanshi                              # Wayland display config tool
@@ -21,6 +24,7 @@ linux                               # Linux kernel
 linux-firmware                      # Firmware files for Linux
 man-db                              # Manuals for CLI tools via `man`
 matugen                             # Material You color generator
+nautilus                            # GUI file explorer
 neovim                              # My home away from home
 network-manager-applet              # NetworkManager applet
 networkmanager                      # Network connection manager
@@ -34,6 +38,7 @@ power-profiles-daemon               # Power management
 powertop                            # Power consumption monitor
 radeontop                           # AMD GPU sensor monitor
 rsync                               # Local and remote file copying
+seahorse                            # GUI SSH/GNUPG key manager
 smartmontools                       # S.M.A.R.T. disk monitoring
 snapshot                            # macos's Photo Booth, but for Linux
 sof-firmware                        # Sound Open Firmware
