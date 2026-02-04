@@ -15,28 +15,28 @@ sudo pacman -S --needed --noconfirm cifs-utils
 
 echo "==> Creating mount directories..."
 for share in "${SHARES[@]}"; do
-	sudo mkdir -p "${MOUNT_BASE}/${share}"
+  sudo mkdir -p "${MOUNT_BASE}/${share}"
 done
 
 echo "==> Checking credentials file..."
 if [[ ! -f "$CREDENTIALS_FILE" ]]; then
-	echo "Error: Credentials file not found at $CREDENTIALS_FILE"
-	echo "Create it with:"
-	echo "  sudo tee $CREDENTIALS_FILE <<EOF"
-	echo "  username=your_nas_user"
-	echo "  password=your_nas_password"
-	echo "  EOF"
-	echo "  sudo chmod 600 $CREDENTIALS_FILE"
-	exit 1
+  echo "Error: Credentials file not found at $CREDENTIALS_FILE"
+  echo "Create it with:"
+  echo "  sudo tee $CREDENTIALS_FILE <<EOF"
+  echo "  username=your_nas_user"
+  echo "  password=your_nas_password"
+  echo "  EOF"
+  echo "  sudo chmod 600 $CREDENTIALS_FILE"
+  exit 1
 fi
 
 echo "==> Creating systemd mount units..."
 for share in "${SHARES[@]}"; do
-	# Escape the mount path for systemd (replace / with -)
-	unit_name=$(systemd-escape -p "${MOUNT_BASE}/${share}")
+  # Escape the mount path for systemd (replace / with -)
+  unit_name=$(systemd-escape -p "${MOUNT_BASE}/${share}")
 
-	# Create .mount unit
-	sudo tee "/etc/systemd/system/${unit_name}.mount" >/dev/null <<EOF
+  # Create .mount unit
+  sudo tee "/etc/systemd/system/${unit_name}.mount" >/dev/null <<EOF
 [Unit]
 Description=Mount ${share} from Synology NAS
 After=network-online.target
@@ -53,8 +53,8 @@ TimeoutSec=30
 WantedBy=multi-user.target
 EOF
 
-	# Create .automount unit for on-demand mounting
-	sudo tee "/etc/systemd/system/${unit_name}.automount" >/dev/null <<EOF
+  # Create .automount unit for on-demand mounting
+  sudo tee "/etc/systemd/system/${unit_name}.automount" >/dev/null <<EOF
 [Unit]
 Description=Automount ${share} from Synology NAS
 After=network-online.target
@@ -68,7 +68,7 @@ TimeoutIdleSec=300
 WantedBy=multi-user.target
 EOF
 
-	echo "  Created units for ${share}"
+  echo "  Created units for ${share}"
 done
 
 echo "==> Reloading systemd daemon..."
@@ -76,15 +76,15 @@ sudo systemctl daemon-reload
 
 echo "==> Enabling automount units..."
 for share in "${SHARES[@]}"; do
-	unit_name=$(systemd-escape -p "${MOUNT_BASE}/${share}")
-	sudo systemctl enable --now "${unit_name}.automount"
+  unit_name=$(systemd-escape -p "${MOUNT_BASE}/${share}")
+  sudo systemctl enable --now "${unit_name}.automount"
 done
 
 echo "==> Samba client setup complete!"
 echo ""
 echo "Shares will auto-mount on access at:"
 for share in "${SHARES[@]}"; do
-	echo "  ${MOUNT_BASE}/${share}"
+  echo "  ${MOUNT_BASE}/${share}"
 done
 echo ""
 echo "To manually mount all shares now:"

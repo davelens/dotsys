@@ -2,6 +2,7 @@
 # I'm wary of the AUR's risks, so I make limited use of it.
 # That said, I've verified these packages as safe at this time of writing.
 
+annotator                           # Image annotation tool
 clipboard-bin                       # Clipboard manager
 jqp-bin                             # Interactive jq playground
 kanata-bin                          # Cross-platform keyboard remapper
@@ -10,5 +11,6 @@ neofetch-git                        # System information tool
 opencode-bin                        # TUI coding agent
 piavpn-bin                          # Private Internet Access client
 pipes.sh                            # Terminal screensaver, win95 style
+scc-bin                             # LOC counter
 watson                              # Time registration
 wezterm-git                         # Terminal emulator
