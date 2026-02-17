@@ -1,0 +1,12 @@
+[Unit]
+Description=Auto-connect Bluetooth devices
+After=bluetooth.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/bluetooth-autoconnect
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
