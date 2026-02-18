@@ -10,6 +10,7 @@ btop                                # Process viewer
 cava                                # Audio visualizer
 cliphist                            # Clipboard manager for Sway+rofi
 cmatrix                             # Nostalgia amplification tool
+ddcutil                             # Query and change monitor settings
 duf                                 # Disk usage monitor
 dust                                # Folder size monitor
 efibootmgr                          # EFI boot manager
