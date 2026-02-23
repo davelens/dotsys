@@ -2,7 +2,7 @@
 baobab                              # Disk usage analyzer
 decibels                            # Audio player
 # epiphany                            # GNOME web browser
-gdm                                 # Display manager
+# gdm                                # Display manager (replaced by greetd+tuigreet)
 gnome-backgrounds                   # GNOME backgrounds
 gnome-calculator                    # Calculator
 gnome-calendar                      # Calendar

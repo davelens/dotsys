@@ -15,6 +15,8 @@ duf                                 # Disk usage monitor
 dust                                # Folder size monitor
 efibootmgr                          # EFI boot manager
 fastfetch                           # System info (but fast)
+greetd                              # Generic greeter daemon
+greetd-tuigreet                     # TUI greeter for greetd
 grub                                # Bootloader
 inotify-tools                       # File change listener used by Ex/Phoenix
 inxi                                # System info (queryable)

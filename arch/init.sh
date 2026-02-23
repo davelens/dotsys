@@ -14,6 +14,7 @@ sudo systemctl enable bluetooth-resume.service
 "$DOTSYS_REPO_HOME/shared/mise/init.sh"
 "$DOTSYS_REPO_HOME/shared/cargo/init.sh"
 "$DOTSYS_REPO_HOME/arch/packages/init.sh" --update
+"$DOTSYS_REPO_HOME/arch/init.d/greetd.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/sway.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/waybar.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/alt-tab.sh"
