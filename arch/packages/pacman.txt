@@ -17,6 +17,7 @@ fwupd                               # Firmware update daemon (BIOS flash etc)
 grub                                # Bootloader
 inotify-tools                       # File change listener used by Ex/Phoenix
 inxi                                # System info (queryable)
+iwd                                 # Wireless daemon (NetworkManager backend)
 kanshi                              # Wayland display config tool
 keychain                            # ssh-agent/gpg-agent key manager
 linux                               # Linux kernel
