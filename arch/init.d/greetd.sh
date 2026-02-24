@@ -18,7 +18,7 @@ sudo tee /etc/greetd/config.toml >/dev/null <<'EOF'
 vt = 1
 
 [default_session]
-command = "tuigreet --time --remember --remember-user-session --cmd sway"
+command = "tuigreet --time --remember --remember-user-session --cmd sway-start"
 user = "greeter"
 EOF
 
