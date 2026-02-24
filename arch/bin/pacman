@@ -24,10 +24,24 @@ install_from_file() {
   sudo pacman -S --noconfirm --needed "${packages[@]}"
 }
 
+clean_orphans() {
+  local orphans
+  orphans=$(pacman -Qdtq 2>/dev/null)
+
+  if [[ -z "$orphans" ]]; then
+    echo "No orphan packages found."
+    return
+  fi
+
+  echo "Removing orphan packages..."
+  sudo pacman -Rns $orphans
+}
+
 usage() {
   echo "Usage: $(basename "$0") [OPTIONS]"
   echo
   echo "Options:"
+  echo "  --clean                     Remove orphan packages"
   echo "  --install-from-file <file>  Install packages listed in the given file"
   echo "  --update                    Run -Syu before installing packages"
   exit 0
@@ -35,6 +49,10 @@ usage() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+  --clean)
+    clean_orphans
+    exit 0
+    ;;
   --update)
     UPDATE=true
     shift
