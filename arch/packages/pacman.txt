@@ -50,6 +50,7 @@ sushi                               # Fast file, image, and video viewer
 tree                                # Simple nested folder tree visualizer
 unzip                               # What it says on the tin
 virt-manager                        # VM Manager
+vulkan-headers                      # Needed to compile Quickshell from source
 vulkan-nouveau                      # Nouveau Vulkan driver
 vulkan-radeon                       # AMD Vulkan driver
 wev                                 # Wayland event monitor
