@@ -3,26 +3,22 @@ amd-ucode                           # AMD CPU microcode
 asciinema                           # Terminal session recorder
 base                                # Minimal base system
 base-devel                          # Development tools (make, gcc, etc.)
-bluez                               # Bluetooth protocol stack
-bluez-utils                         # Bluetooth utilities
-brightnessctl                       # Display brightness control tool
 btop                                # Process viewer
 cava                                # Audio visualizer
 cliphist                            # Clipboard manager for Sway+rofi
 cmatrix                             # Nostalgia amplification tool
-ddcutil                             # Query and change monitor settings
+cpupower                            # CPU frequency/governor tool
 duf                                 # Disk usage monitor
 dust                                # Folder size monitor
 efibootmgr                          # EFI boot manager
 fastfetch                           # System info (but fast)
-greetd                              # Generic greeter daemon
-greetd-tuigreet                     # TUI greeter for greetd
+foot                                # Very lightweight terminal
+fwupd                               # Firmware update daemon (BIOS flash etc)
 grub                                # Bootloader
 inotify-tools                       # File change listener used by Ex/Phoenix
 inxi                                # System info (queryable)
 kanshi                              # Wayland display config tool
 keychain                            # ssh-agent/gpg-agent key manager
-libpulse                            # PulseAudio client library
 linux                               # Linux kernel
 linux-firmware                      # Firmware files for Linux
 man-db                              # Manuals for CLI tools via `man`
@@ -32,30 +28,30 @@ network-manager-applet              # NetworkManager applet
 networkmanager                      # Network connection manager
 nmap                                # network scanner
 pavucontrol                         # PulseAudio volume control tool
+pgcli                               # Postgres CLI client with some QoL
 pipewire                            # Audio/video server
 pipewire-alsa                       # ALSA support for PipeWire
 pipewire-jack                       # JACK support for PipeWire
 pipewire-pulse                      # PulseAudio replacement
-power-profiles-daemon               # Power management
 powertop                            # Power consumption monitor
 radeontop                           # AMD GPU sensor monitor
 rsync                               # Local and remote file copying
 seahorse                            # GUI SSH/GNUPG key manager
 slurp                               # Region selection in Wayland compositors
 smartmontools                       # S.M.A.R.T. disk monitoring
-snapshot                            # macos's Photo Booth, but for Linux
+# snapshot                            # macos's Photo Booth, but for Linux
 sof-firmware                        # Sound Open Firmware
 tree                                # Simple nested folder tree visualizer
+ttf-monaspace-variable              # Makes GitHub code look better in browser
 unzip                               # What it says on the tin
-virt-manager                        # VM Manager
 vulkan-headers                      # Needed to compile Quickshell from source
 vulkan-nouveau                      # Nouveau Vulkan driver
 vulkan-radeon                       # AMD Vulkan driver
-wev                                 # Wayland event monitor
 wireguard-tools                     # WireGuard protocol tools (for PIA)
 wireless_tools                      # Wireless network tools
 wireplumber                         # PipeWire session manager
 xclip                               # X11 clipboard tool
+xdg-desktop-portal-wlr              # wlroots desktop portal
 xdg-utils                           # XDG desktop integration utilities
 xf86-video-amdgpu                   # AMD GPU driver
 xf86-video-ati                      # ATI GPU driver
@@ -74,7 +70,6 @@ bitwarden-cli                       # Access Bitwarden vaults in shell
 coreutils                           # GNU Core Utils, helps do work in Unix
 dav1d                               # Open source AV1 decoder
 ddgr                                # DuckDuckGo from the terminal
-ffmpeg                              # Media conversion tool
 figlet                              # Text to ASCII generator
 fzf                                 # Fuzzy finder
 gawk                                # awk, but the GNU version
@@ -108,7 +103,6 @@ wget                                # Network downloader
 # asciinema                           # Records shareable terminal sessions
 # atuin                               # Shell history with syncing
 # bat                                 # Cat clone with git integration + colors
-# btop                                # Resource monitor
 # chafa                               # Image to ANSI/unicode art generator
 # cmake                               # Cross-platform meta build tool
 # cmatrix                             # Follow the white rabbit ...

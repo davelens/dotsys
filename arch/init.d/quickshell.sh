@@ -11,7 +11,7 @@ echo "==> Installing Quickshell and dependencies..."
 # - ddcutil: External monitor brightness via DDC/CI
 # - networkmanager: WiFi management (nmcli)
 # - pipewire, wireplumber: Audio (PipeWire integration)
-# - otf-commit-mono-nerd: Nerd Font icons
+# - ttf-dejavu + otf-commit-mono-nerd: Fonts for panels + Nerd icons
 # - libnotify: notify-send for test notifications
 sudo pacman -S --needed --noconfirm \
   bluez bluez-utils \
@@ -19,7 +19,7 @@ sudo pacman -S --needed --noconfirm \
   ddcutil \
   networkmanager \
   pipewire wireplumber \
-  otf-commit-mono-nerd \
+  otf-commit-mono-nerd ttf-dejavu \
   libnotify
 
 # Quickshell from AUR (git version for latest features)

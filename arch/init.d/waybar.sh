@@ -10,6 +10,7 @@ sudo pacman -S --needed --noconfirm waybar \
   bluez bluez-utils \
   brightnessctl \
   fzf \
+  libpulse \
   networkmanager \
   pacman-contrib \
   pipewire-pulse \

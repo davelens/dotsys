@@ -13,6 +13,7 @@ sudo pacman -S --needed --noconfirm \
   gvfs-nfs \
   gvfs-smb \
   gvfs-wsdd \
+  xdg-user-dirs-gtk \
   nautilus
 
 echo "Nautilus installed with gvfs support."
