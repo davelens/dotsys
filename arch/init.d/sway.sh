@@ -4,12 +4,12 @@ set -e
 echo "==> Installing Sway..."
 
 sudo pacman -S --needed --noconfirm \
-  sway sway-contrib swaybg swayidle \
-  mako \
-  libpulse \
-  grim \
-  rofi-wayland \
-  wev
+	sway sway-contrib swaybg swayidle \
+	mako \
+	libpulse \
+	grim \
+	rofi-wayland rofi-calc \
+	wev
 
 # Includes the `swaylock` binary.
 paru -S --needed --noconfirm swaylock-effects
