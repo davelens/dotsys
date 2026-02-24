@@ -27,7 +27,6 @@ linux                               # Linux kernel
 linux-firmware                      # Firmware files for Linux
 man-db                              # Manuals for CLI tools via `man`
 matugen                             # Material You color generator
-nautilus                            # GUI file explorer
 neovim                              # My home away from home
 network-manager-applet              # NetworkManager applet
 networkmanager                      # Network connection manager
@@ -46,7 +45,6 @@ slurp                               # Region selection in Wayland compositors
 smartmontools                       # S.M.A.R.T. disk monitoring
 snapshot                            # macos's Photo Booth, but for Linux
 sof-firmware                        # Sound Open Firmware
-sushi                               # Fast file, image, and video viewer
 tree                                # Simple nested folder tree visualizer
 unzip                               # What it says on the tin
 virt-manager                        # VM Manager

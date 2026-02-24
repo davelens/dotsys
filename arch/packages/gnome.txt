@@ -35,27 +35,18 @@ gnome-user-share                    # File sharing
 # gnome-weather                       # Weather
 grilo-plugins                       # Media discovery plugins
 gst-plugin-pipewire                 # GStreamer PipeWire plugin
-gvfs                                # Virtual filesystem
-gvfs-afc                            # Apple device support
-gvfs-dnssd                          # DNS-SD support
 # gvfs-goa                            # GNOME Online Accounts support
 # gvfs-google                         # Google Drive support
-gvfs-gphoto2                        # Camera support
-gvfs-mtp                            # MTP device support
-gvfs-nfs                            # NFS support
 gvfs-onedrive                       # OneDrive support
-gvfs-smb                            # SMB/CIFS support
-gvfs-wsdd                           # Windows discovery support
 # loupe                               # Image viewer
 # malcontent                          # Parental controls
-# nautilus                            # File manager
 # orca                                # Screen reader
 papers                              # Document viewer
 rygel                               # Media server
 # showtime                            # Video player
 # simple-scan                         # Scanner utility
 # snapshot                            # Camera app
-# sushi                               # File previewer
+
 # tecla                               # Keyboard viewer
 # xdg-desktop-portal-gnome            # Desktop portal
 # xdg-user-dirs-gtk                   # User directories
