@@ -1,0 +1,14 @@
+[Unit]
+Description=Dynamic output configuration for Wayland
+Documentation=man:kanshi(1)
+PartOf=sway-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/kanshi
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=sway-session.target
