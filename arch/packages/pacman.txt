@@ -17,7 +17,6 @@ fwupd                               # Firmware update daemon (BIOS flash etc)
 grub                                # Bootloader
 inotify-tools                       # File change listener used by Ex/Phoenix
 inxi                                # System info (queryable)
-iwd                                 # Wireless daemon (NetworkManager backend)
 keychain                            # ssh-agent/gpg-agent key manager
 linux                               # Linux kernel
 linux-firmware                      # Firmware files for Linux
@@ -25,7 +24,6 @@ man-db                              # Manuals for CLI tools via `man`
 matugen                             # Material You color generator
 neovim                              # My home away from home
 network-manager-applet              # NetworkManager applet
-networkmanager                      # Network connection manager
 nmap                                # network scanner
 pavucontrol                         # PulseAudio volume control tool
 pgcli                               # Postgres CLI client with some QoL
