@@ -12,19 +12,16 @@ else
   fprintd-enroll
 fi
 
-# PAM configuration for fingerprint auth. Afaik you only need to cover
-# login, su, and sudo files.
-PAM_CONFIG="auth required pam_env.so
-auth sufficient pam_fprintd.so
-auth sufficient pam_unix.so try_first_pass likeauth nullok
-auth required pam_deny.so"
-
-for file in greetd login su sudo; do
+# Add fingerprint auth to PAM files by inserting pam_fprintd.so before
+# the existing pam_unix.so auth line, preserving the rest of the config.
+for file in login su sudo; do
   pam_file="/etc/pam.d/$file"
-  if ! grep -q "pam_fprintd.so" "$pam_file" 2>/dev/null; then
-    echo "$PAM_CONFIG" | sudo tee "$pam_file" >/dev/null
+  if grep -q "pam_fprintd.so" "$pam_file" 2>/dev/null; then
+    echo "$pam_file already configured, skipping"
+  elif grep -q "pam_unix.so" "$pam_file" 2>/dev/null; then
+    sudo sed -i '/^auth.*pam_unix.so/i auth      sufficient pam_fprintd.so' "$pam_file"
     echo "Configured $pam_file"
   else
-    echo "$pam_file already configured, skipping"
+    echo "WARNING: $pam_file has no pam_unix.so line, skipping"
   fi
 done
