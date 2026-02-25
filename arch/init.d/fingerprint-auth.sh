@@ -19,7 +19,7 @@ auth sufficient pam_fprintd.so
 auth sufficient pam_unix.so try_first_pass likeauth nullok
 auth required pam_deny.so"
 
-for file in login su sudo; do
+for file in greetd login su sudo; do
   pam_file="/etc/pam.d/$file"
   if ! grep -q "pam_fprintd.so" "$pam_file" 2>/dev/null; then
     echo "$PAM_CONFIG" | sudo tee "$pam_file" >/dev/null
