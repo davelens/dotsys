@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-source "$DOTSYS_REPO_HOME/arch/helpers.sh"
+source arch/helpers.sh
 
 main() {
   if ! command -v cargo &>/dev/null; then
