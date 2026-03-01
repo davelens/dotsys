@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -e
+source arch/helpers.sh
 
-MYSQL_CONFIG_DIR="$DOTFILES_REPO_HOME/config/mysql/docker"
+INSTALL_DIR="$DOTSYS_REPO_HOME/arch/init.d/mysql@8.4"
 MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-root}"
 
 if ! command -v docker >/dev/null; then
@@ -17,7 +18,7 @@ if docker ps -a --format '{{.Names}}' | grep -q '^mysql84$'; then
 fi
 
 echo "Starting MySQL 8.4 container..."
-docker compose -f "$MYSQL_CONFIG_DIR/docker-compose.yml" up -d
+docker compose -f "$INSTALL_DIR/docker/docker-compose.yml" up -d
 
 echo "Waiting for MySQL to be ready..."
 until docker exec mysql84 mysqladmin ping -h localhost -uroot -proot --silent 2>/dev/null; do
@@ -46,6 +47,6 @@ chmod 600 ~/.my.cnf
 echo "MySQL $(docker exec mysql84 mysql -uroot -proot -sNe "SELECT VERSION();" 2>/dev/null) is ready."
 echo
 echo "Commands:"
-echo "  Start:  docker compose -f $MYSQL_CONFIG_DIR/docker-compose.yml up -d"
-echo "  Stop:   docker compose -f $MYSQL_CONFIG_DIR/docker-compose.yml down"
+echo "  Start:  docker compose -f $INSTALL_DIR/docker/docker-compose.yml up -d"
+echo "  Stop:   docker compose -f $INSTALL_DIR/docker/docker-compose.yml down"
 echo "  Shell:  mysql (uses ~/.my.cnf)"
