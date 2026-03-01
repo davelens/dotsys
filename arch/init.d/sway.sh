@@ -16,7 +16,8 @@ sudo pacman -S --needed --noconfirm \
 paru -S --needed --noconfirm swaylock-effects
 
 # Fingerprint auth with swaylock.
-sudo cp "$DOTFILES_REPO_HOME/config/arch/swaylock/pam-d.config" /etc/pam.d/swaylock
+# TODO: Yeah this isn't ideal. There's a best-practice way to do this instead.
+# sudo cp "$DOTFILES_REPO_HOME/config/arch/swaylock/pam-d.config" /etc/pam.d/swaylock
 
 mkdir -p "$HOME/Pictures"
 cp -r "$DOTSYS_REPO_HOME/wallpapers" ~/Pictures/
