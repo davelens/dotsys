@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source arch/helpers.sh
 
 # Enable lingering so user services start at boot (before login)
 sudo loginctl enable-linger "$USER"
@@ -21,8 +20,8 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 paru -S --needed --noconfirm kanata-bin
 systemctl --user daemon-reload
-systemctl --user enable "$SCRIPT_DIR/../systemd/kanata.service"
-systemctl --user enable "$SCRIPT_DIR/../systemd/kanata-external.service"
+systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/kanata.service"
+systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/kanata-external.service"
 systemctl --user restart kanata
 systemctl --user restart kanata-external
 

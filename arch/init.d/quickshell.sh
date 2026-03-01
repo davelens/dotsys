@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source arch/helpers.sh
 
 echo "==> Installing Quickshell and dependencies..."
 
@@ -48,7 +47,7 @@ fi
 # Create systemd user service for quickshell
 echo "==> Setting up Quickshell systemd service..."
 systemctl --user daemon-reload
-systemctl --user enable "$SCRIPT_DIR/../systemd/quickshell.service"
+systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/quickshell.service"
 systemctl --user restart quickshell
 
 # Install desktop entry for settings panel

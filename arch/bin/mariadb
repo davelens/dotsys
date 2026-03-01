@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -e
+source arch/helpers.sh
 
 install_mariadb() {
-  "$DOTFILES_REPO_HOME/setup/arch/init.d/mariadb.sh" "$@"
+  "$DOTSYS_REPO_HOME/arch/init.d/mariadb.sh" "$@"
 }
 
 uninstall_mariadb() {
   echo "WARNING: This will completely remove MariaDB, including all databases."
-  answer=$($prompt_user -yn "Are you sure you want to continue?")
+  answer=$(read -rp "Are you sure you want to continue? [y/N] " answer)
   echo
   [[ ! "$answer" =~ [Yy] ]] && exit 0
 
@@ -47,17 +48,17 @@ usage() {
 }
 
 case "$1" in
-  --install)
-    shift
-    install_mariadb "$@"
-    ;;
-  --uninstall)
-    uninstall_mariadb
-    ;;
-  -h|--help)
-    usage
-    ;;
-  *)
-    usage
-    ;;
+--install)
+  shift
+  install_mariadb "$@"
+  ;;
+--uninstall)
+  uninstall_mariadb
+  ;;
+-h | --help)
+  usage
+  ;;
+*)
+  usage
+  ;;
 esac

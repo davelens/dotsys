@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source arch/helpers.sh
 
 # Install the autoconnect script
 mkdir -p ~/.local/bin
@@ -50,7 +49,7 @@ chmod +x ~/.local/bin/bluetooth-autoconnect
 
 # Enable and start the service
 systemctl --user daemon-reload
-systemctl --user enable "$SCRIPT_DIR/../systemd/bluetooth-autoconnect.service"
+systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/bluetooth-autoconnect.service"
 systemctl --user restart bluetooth-autoconnect
 
 echo "Bluetooth autoconnect service installed and started"

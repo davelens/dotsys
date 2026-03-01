@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source arch/helpers.sh
 
 echo "==> Installing GNOME packages..."
-"$SCRIPT_DIR/../../bin/pacman" --install-from-file "$SCRIPT_DIR/packages/gnome.txt"
+"$DOTSYS_REPO_HOME/arch/bin/pacman" --install-from-file "$DOTSYS_REPO_HOME/arch/packages/gnome.txt"
 
 echo "==> Configuring GNOME settings..."
-"$SCRIPT_DIR/settings.sh"
+"$DOTSYS_REPO_HOME/arch/init.d/gnome/settings.sh"
 
 echo "GNOME installation complete."

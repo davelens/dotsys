@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source arch/helpers.sh
 
 echo "==> Installing Waybar..."
 
@@ -17,7 +16,8 @@ sudo pacman -S --needed --noconfirm waybar \
   otf-commit-mono-nerd
 
 systemctl --user daemon-reload
-systemctl --user enable "$SCRIPT_DIR/../systemd/waybar.service"
+
+systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/waybar.service"
 
 pgrep waybar >/dev/null && pkill waybar
 waybar &>/dev/null &

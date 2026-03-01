@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+source arch/helpers.sh
 
 echo "==> Installing Sway..."
 
@@ -17,6 +18,5 @@ paru -S --needed --noconfirm swaylock-effects
 # Fingerprint auth with swaylock.
 sudo cp "$DOTFILES_REPO_HOME/config/arch/swaylock/pam-d.config" /etc/pam.d/swaylock
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p "$HOME/Pictures"
-cp -r "$SCRIPT_DIR/../../wallpapers" ~/Pictures/
+cp -r "$DOTSYS_REPO_HOME/wallpapers" ~/Pictures/

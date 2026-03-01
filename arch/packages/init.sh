@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+source arch/helpers.sh
 
 usage() {
   echo "Usage: $(basename "$0") [OPTIONS]"
@@ -34,10 +35,9 @@ main() {
     flatpak update -y
   fi
 
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  "$SCRIPT_DIR/../bin/pacman" --install-from-file "$SCRIPT_DIR/pacman.txt"
-  "$SCRIPT_DIR/../bin/paru" --install-from-file "$SCRIPT_DIR/aur.txt"
-  "$SCRIPT_DIR/../bin/flatpak" --install-from-file "$SCRIPT_DIR/flatpak.txt"
+  "$DOTSYS_REPO_HOME/arch/bin/pacman" --install-from-file "$DOTSYS_REPO_HOME/arch/packages/pacman.txt"
+  "$DOTSYS_REPO_HOME/arch/bin/paru" --install-from-file "$DOTSYS_REPO_HOME/arch/packages/aur.txt"
+  "$DOTSYS_REPO_HOME/arch/bin/flatpak" --install-from-file "$DOTSYS_REPO_HOME/arch/packages/flatpak.txt"
 }
 
 main "$@"
