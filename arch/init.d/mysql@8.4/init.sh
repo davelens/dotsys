@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 set -e
-source arch/helpers.sh
+DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../../../ && pwd)"
 
 INSTALL_DIR="$DOTSYS_REPO_HOME/arch/init.d/mysql@8.4"
 MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-root}"
 
 if ! command -v docker >/dev/null; then
-  echo "Docker is not installed. Install it first."
-  exit 1
+	echo "Docker is not installed. Install it first."
+	exit 1
 fi
 
 if docker ps -a --format '{{.Names}}' | grep -q '^mysql84$'; then
-  echo "MySQL 8.4 container already exists. To recreate:"
-  echo "  docker rm -f mysql84"
-  echo "  # Then run this script again"
-  exit 1
+	echo "MySQL 8.4 container already exists. To recreate:"
+	echo "  docker rm -f mysql84"
+	echo "  # Then run this script again"
+	exit 1
 fi
 
 echo "Starting MySQL 8.4 container..."
@@ -22,7 +22,7 @@ docker compose -f "$INSTALL_DIR/docker/docker-compose.yml" up -d
 
 echo "Waiting for MySQL to be ready..."
 until docker exec mysql84 mysqladmin ping -h localhost -uroot -proot --silent 2>/dev/null; do
-  sleep 1
+	sleep 1
 done
 
 # Create ~/.my.cnf for passwordless local access via TCP.

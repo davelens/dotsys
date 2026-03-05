@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-source arch/helpers.sh
+DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
 echo "==> Setting up Bluetooth..."
 

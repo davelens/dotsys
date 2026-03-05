@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -e
-source arch/helpers.sh
+DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
 # Enable lingering so user services start at boot (before login)
 sudo loginctl enable-linger "$USER"
 
 # Create uinput group if it doesn't exist
 if ! getent group uinput >/dev/null; then
-  sudo groupadd uinput
+	sudo groupadd uinput
 fi
 
 # Ensure user is in input and uinput groups for device access
@@ -15,7 +15,7 @@ sudo usermod -aG input,uinput "$USER"
 
 # Create udev rule for uinput device permissions
 echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"' |
-  sudo tee /etc/udev/rules.d/99-input.rules >/dev/null
+	sudo tee /etc/udev/rules.d/99-input.rules >/dev/null
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
 paru -S --needed --noconfirm kanata-bin

@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 set -e
-source arch/helpers.sh
+DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+source "$DOTSYS_REPO_HOME/arch/helpers.sh"
 
 main() {
-  if ! command -v cargo &>/dev/null; then
-    echo "Error: cargo is not available. Rust may not be installed correctly."
-    exit 1
-  fi
+	if ! command -v cargo &>/dev/null; then
+		echo "Error: cargo is not available. Rust may not be installed correctly."
+		exit 1
+	fi
 
-  local packages
-  mapfile -t packages < <(read_packages "$DOTSYS_REPO_HOME/shared/cargo/packages")
+	local packages
+	mapfile -t packages < <(read_packages "$DOTSYS_REPO_HOME/shared/cargo/packages")
 
-  echo "==> Installing cargo packages..."
-  for pkg in "${packages[@]}"; do
-    echo "    Installing $pkg..."
-    cargo install --locked "$pkg"
-  done
-  echo "==> Cargo packages installed successfully."
+	echo "==> Installing cargo packages..."
+	for pkg in "${packages[@]}"; do
+		echo "    Installing $pkg..."
+		cargo install --locked "$pkg"
+	done
+	echo "==> Cargo packages installed successfully."
 }
 
 main "$@"

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-source arch/helpers.sh
+DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 "$DOTSYS_REPO_HOME/arch/preflight.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/wifi.sh"
@@ -12,12 +12,13 @@ source arch/helpers.sh
 "$DOTSYS_REPO_HOME/arch/init.d/greetd.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/kanshi.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/sway.sh"
-"$DOTSYS_REPO_HOME/arch/init.d/waybar.sh"
-"$DOTSYS_REPO_HOME/arch/init.d/alt-tab.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/kanata.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/mariadb.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/power-profiles.sh"
-# "$DOTSYS_REPO_HOME/shared/postgres/init.sh"
+#"$DOTSYS_REPO_HOME/arch/init.d/waybar.sh"
+#"$DOTSYS_REPO_HOME/arch/init.d/alt-tab.sh"
+#"$DOTSYS_REPO_HOME/shared/postgres/init.sh"
+
 # NOTE: This is disabled for now until I can properly "reset" this to
 # the default state of things. It should by-and-large work though.
 # "$DOTSYS_REPO_HOME/arch/init.d/fingerprint-auth.sh"

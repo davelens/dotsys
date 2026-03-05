@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -e
-source arch/helpers.sh
+DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
 echo "==> Installing Waybar..."
 
 # bluetoothctl, nmcli, checkupdates,...
 sudo pacman -S --needed --noconfirm waybar \
-  bluez bluez-utils \
-  brightnessctl \
-  fzf \
-  libpulse \
-  networkmanager \
-  pacman-contrib \
-  pipewire-pulse \
-  otf-commit-mono-nerd
+	bluez bluez-utils \
+	brightnessctl \
+	fzf \
+	libpulse \
+	networkmanager \
+	pacman-contrib \
+	pipewire-pulse \
+	otf-commit-mono-nerd
 
 systemctl --user daemon-reload
 
