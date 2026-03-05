@@ -6,7 +6,7 @@ After=sway-session.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/quickshell
+ExecStart=/usr/bin/quickshell -p %h/.config/dotshell
 Restart=on-failure
 RestartSec=3
 
