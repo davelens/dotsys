@@ -42,7 +42,6 @@ sof-firmware                        # Sound Open Firmware
 tree                                # Simple nested folder tree visualizer
 ttf-monaspace-variable              # Makes GitHub code look better in browser
 unzip                               # What it says on the tin
-vulkan-headers                      # Needed to compile Quickshell from source
 vulkan-nouveau                      # Nouveau Vulkan driver
 vulkan-radeon                       # AMD Vulkan driver
 wireguard-tools                     # WireGuard protocol tools (for PIA)

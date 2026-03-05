@@ -12,6 +12,7 @@ echo "==> Installing Quickshell and dependencies..."
 # - pipewire, wireplumber: Audio (PipeWire integration)
 # - ttf-dejavu + otf-commit-mono-nerd: Fonts for panels + Nerd icons
 # - libnotify: notify-send for test notifications
+# - vulkan-headers: Needed to compile Quickshell from source
 sudo pacman -S --needed --noconfirm \
   bluez bluez-utils \
   brightnessctl \
@@ -19,7 +20,8 @@ sudo pacman -S --needed --noconfirm \
   networkmanager \
   pipewire wireplumber \
   otf-commit-mono-nerd ttf-dejavu \
-  libnotify
+  libnotify \
+  vulkan-headers
 
 # Quickshell from AUR (git version for latest features)
 paru -S --needed --noconfirm quickshell-git
