@@ -4,6 +4,7 @@
 
 annotator                           # Image annotation tool
 clipboard-bin                       # Clipboard manager
+figlet-fonts                        # Additional figlet fonts (rectangles++)
 firefox-bin                         # Everyone's favourite fox
 jqp-bin                             # Interactive jq playground
 lazysql-bin                         # TUI for SQL databases
