@@ -14,6 +14,15 @@ sudo pacman -S --needed --noconfirm \
   gvfs-smb \
   gvfs-wsdd \
   xdg-user-dirs-gtk \
+  xdg-desktop-portal-gtk \
   nautilus
 
-echo "Nautilus installed with gvfs support."
+# Dark mode for libadwaita apps (e.g. Nautilus).
+# In a standalone WM (no gnome-settings-daemon), libadwaita reads the
+# color-scheme preference via xdg-desktop-portal-gtk's Settings interface.
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+
+# Restart the portal so it picks up the newly installed GTK backend.
+systemctl --user restart xdg-desktop-portal.service
+
+echo "Nautilus installed with gvfs and dark mode support."
