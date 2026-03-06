@@ -20,9 +20,17 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 
 paru -S --needed --noconfirm kanata-bin
 systemctl --user daemon-reload
-systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/kanata.service"
+
+# Only enable the internal keyboard service if a Framework keyboard is present.
+# On other machines, only the external/catch-all service is needed.
+if ls /dev/input/by-id/*Framework* &>/dev/null; then
+	systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/kanata.service"
+	systemctl --user restart kanata
+else
+	systemctl --user disable kanata.service 2>/dev/null || true
+fi
+
 systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/kanata-external.service"
-systemctl --user restart kanata
 systemctl --user restart kanata-external
 
 # When you press capslock while Kanata is starting, you might end up with an
