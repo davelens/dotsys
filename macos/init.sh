@@ -8,3 +8,4 @@ brew bundle --file="$DOTSYS_REPO_HOME"/macos/Brewfile
 
 "$DOTSYS_REPO_HOME/shared/mise/init.sh"
 "$DOTSYS_REPO_HOME/shared/cargo/init.sh"
+"$DOTSYS_REPO_HOME/shared/gh/init.sh"

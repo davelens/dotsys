@@ -8,6 +8,7 @@ DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 "$DOTSYS_REPO_HOME/shared/gnupg/init.sh"
 "$DOTSYS_REPO_HOME/shared/mise/init.sh"
 "$DOTSYS_REPO_HOME/shared/cargo/init.sh"
+"$DOTSYS_REPO_HOME/shared/gh/init.sh"
 "$DOTSYS_REPO_HOME/arch/packages/init.sh" --update
 "$DOTSYS_REPO_HOME/arch/init.d/greetd.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/kanshi.sh"
