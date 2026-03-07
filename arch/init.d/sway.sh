@@ -6,6 +6,7 @@ echo "==> Installing Sway..."
 
 sudo pacman -S --needed --noconfirm \
 	sway sway-contrib swaybg swayidle \
+	xorg-xwayland \
 	mako \
 	libpulse \
 	grim \
