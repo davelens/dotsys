@@ -5,6 +5,9 @@ echo "==> Setting up Nautilus with gvfs backends..."
 
 sudo pacman -S --needed --noconfirm \
   sushi \
+  gst-plugins-base \
+  gst-plugins-good \
+  gst-libav \
   gvfs \
   gvfs-afc \
   gvfs-dnssd \
