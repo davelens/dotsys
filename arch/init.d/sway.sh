@@ -5,13 +5,14 @@ DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 echo "==> Installing Sway..."
 
 sudo pacman -S --needed --noconfirm \
-	sway sway-contrib swaybg swayidle \
-	xorg-xwayland \
-	mako \
-	libpulse \
-	grim \
-	rofi-wayland rofi-calc \
-	wev
+  sway sway-contrib swaybg swayidle \
+  xorg-xwayland \
+  mako \
+  libpulse \
+  grim \
+  rofi-wayland rofi-calc \
+  flameshot \
+  wev
 
 # Includes the `swaylock` binary.
 paru -S --needed --noconfirm swaylock-effects
