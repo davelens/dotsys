@@ -50,6 +50,7 @@
     "networkmanager",
     "nmap",
     "openssh",
+    "os-prober",
     "pavucontrol",
     "pipewire",
     "pipewire-alsa",
