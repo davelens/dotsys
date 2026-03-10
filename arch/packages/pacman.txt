@@ -1,99 +1,39 @@
 # Arch-specific system packages
-amd-ucode                           # AMD CPU microcode
 asciinema                           # Terminal session recorder
-base                                # Minimal base system
-base-devel                          # Development tools (make, gcc, etc.)
-btop                                # Process viewer
 cava                                # Audio visualizer
 cliphist                            # Clipboard manager for Sway+rofi
 cmatrix                             # Nostalgia amplification tool
 cpupower                            # CPU frequency/governor tool
 duf                                 # Disk usage monitor
 dust                                # Folder size monitor
-efibootmgr                          # EFI boot manager
 fastfetch                           # System info (but fast)
-foot                                # Very lightweight terminal
-fwupd                               # Firmware update daemon (BIOS flash etc)
-grub                                # Bootloader
 inotify-tools                       # File change listener used by Ex/Phoenix
 inxi                                # System info (queryable)
-keychain                            # ssh-agent/gpg-agent key manager
-linux                               # Linux kernel
-linux-firmware                      # Firmware files for Linux
-man-db                              # Manuals for CLI tools via `man`
 matugen                             # Material You color generator
-neovim                              # My home away from home
 network-manager-applet              # NetworkManager applet
-nmap                                # network scanner
-pavucontrol                         # PulseAudio volume control tool
 pgcli                               # Postgres CLI client with some QoL
-pipewire                            # Audio/video server
-pipewire-alsa                       # ALSA support for PipeWire
-pipewire-jack                       # JACK support for PipeWire
-pipewire-pulse                      # PulseAudio replacement
 powertop                            # Power consumption monitor
 radeontop                           # AMD GPU sensor monitor
-rsync                               # Local and remote file copying
 seahorse                            # GUI SSH/GNUPG key manager
-slurp                               # Region selection in Wayland compositors
-smartmontools                       # S.M.A.R.T. disk monitoring
 # snapshot                            # macos's Photo Booth, but for Linux
-sof-firmware                        # Sound Open Firmware
-tree                                # Simple nested folder tree visualizer
 ttf-monaspace-variable              # Makes GitHub code look better in browser
-unzip                               # What it says on the tin
-vulkan-nouveau                      # Nouveau Vulkan driver
-vulkan-radeon                       # AMD Vulkan driver
 wireguard-tools                     # WireGuard protocol tools (for PIA)
-wireless_tools                      # Wireless network tools
-wireplumber                         # PipeWire session manager
 xclip                               # X11 clipboard tool
-xdg-desktop-portal-wlr              # wlroots desktop portal
-xdg-utils                           # XDG desktop integration utilities
-xf86-video-amdgpu                   # AMD GPU driver
-xf86-video-ati                      # ATI GPU driver
-xf86-video-nouveau                  # Nouveau GPU driver
 xorg-server                         # X.Org display server
 xorg-xinit                          # X.Org initialization
 xorg-xrandr                         # Display configuration tool
 zram-generator                      # Systemd zram generator
 
 # Cross-platform packages (from Brewfile.default)
-automake                            # Generates Makefiles
-bash                                # Bourne Again SHell
-bash-completion                     # Generates completion for bash commands
 bash-language-server                # LSP server for Bash
-bitwarden-cli                       # Access Bitwarden vaults in shell
-coreutils                           # GNU Core Utils, helps do work in Unix
 dav1d                               # Open source AV1 decoder
 ddgr                                # DuckDuckGo from the terminal
-figlet                              # Text to ASCII generator
-fzf                                 # Fuzzy finder
-gawk                                # awk, but the GNU version
-gcc                                 # GNU compiler collection
-git                                 # The stupid content tracker
-git-crypt                           # Transparent git file encryption
-git-delta                           # Diff tool
-github-cli                          # GitHub CLI tool
-gnupg                               # GNU Privacy Guard
-gnutls                              # Sets up TLS connections
-gpgme                               # GnuPG library access
 imagemagick                         # Image manipulation tools, v7+
 inetutils                           # GNU network utilities
-jq                                  # JSON processor
 less                                # Reads text files, one screen at a time
-libyaml                             # YAML parser (required for Ruby's psych)
 pastel                              # Terminal colour manipulation
-pkgconf                             # Helps configure compiler/linker flags
-ripgrep                             # Fuzzy search
-sed                                 # GNU sed (default on Arch)
-starship                            # Customizable shell prompt
-tar                                 # GNU tar (default on Arch)
-tmux                                # Terminal multiplexer
 tree-sitter                         # Parser generator and library
 tree-sitter-cli                     # Interact with tree-sitter through CLI
-unzip                               # Extract ZIP archives
-wget                                # Network downloader
 
 # To be reviewed (not currently installed)
 # act                                 # Run GitHub Actions locally
@@ -101,8 +41,6 @@ wget                                # Network downloader
 # atuin                               # Shell history with syncing
 # bat                                 # Cat clone with git integration + colors
 # chafa                               # Image to ANSI/unicode art generator
-# cmake                               # Cross-platform meta build tool
-# cmatrix                             # Follow the white rabbit ...
 # cmus                                # Music player
 # ctags                               # Generates tag files for source code
 # deno                                # Modern JS and TypeScript runtime
