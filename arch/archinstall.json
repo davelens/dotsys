@@ -86,6 +86,6 @@
   "timezone": "Europe/Brussels",
   "custom_commands": [
     "printf '%s\\n' 'davelens ALL=(ALL) NOPASSWD: ALL' 'Defaults timestamp_timeout=120' > /etc/sudoers.d/00_davelens && chmod 0440 /etc/sudoers.d/00_davelens",
-    "systemctl enable sshd",
+    "systemctl enable sshd"
   ]
 }
