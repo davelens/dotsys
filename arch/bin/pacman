@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -e
-DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
-source "$DOTSYS_REPO_HOME/arch/helpers.sh"
+
+read_packages() {
+  grep -v '^\s*#' "$1" | grep -v '^\s*$' | awk '{print $1}'
+}
 
 UPDATE=false
 
