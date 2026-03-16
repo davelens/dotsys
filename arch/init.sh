@@ -18,10 +18,10 @@ DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # "$DOTSYS_REPO_HOME/shared/mise/init.sh"
 # "$DOTSYS_REPO_HOME/shared/cargo/init.sh"
 # "$DOTSYS_REPO_HOME/arch/init.d/mariadb.sh"
+# "$DOTSYS_REPO_HOME/arch/init.d/postgres.sh"
 # "$DOTSYS_REPO_HOME/arch/packages/init.sh" --update
 # "$DOTSYS_REPO_HOME/arch/init.d/waybar.sh"
 # "$DOTSYS_REPO_HOME/arch/init.d/alt-tab.sh"
-# "$DOTSYS_REPO_HOME/shared/postgres/init.sh"
 
 # NOTE: This is disabled for now until I can properly "reset" this to
 # the default state of things. It should by-and-large work though.
