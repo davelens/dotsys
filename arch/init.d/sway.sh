@@ -6,8 +6,8 @@ echo "==> Installing Sway..."
 
 sudo pacman -S --needed --noconfirm \
 	sway sway-contrib swaybg swayidle \
-	xdg-desktop-portal-wlr \
-	xorg-xwayland \
+	xdg-desktop-portal-wlr xorg-xwayland \
+  autotiling-rs \
 	libpulse \
 	rofi-wayland rofi-calc \
 	flameshot \
