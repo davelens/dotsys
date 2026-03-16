@@ -21,7 +21,6 @@ DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # "$DOTSYS_REPO_HOME/arch/init.d/postgres.sh"
 # "$DOTSYS_REPO_HOME/arch/packages/init.sh" --update
 # "$DOTSYS_REPO_HOME/arch/init.d/waybar.sh"
-# "$DOTSYS_REPO_HOME/arch/init.d/alt-tab.sh"
 
 # NOTE: This is disabled for now until I can properly "reset" this to
 # the default state of things. It should by-and-large work though.
