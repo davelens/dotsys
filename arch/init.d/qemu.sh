@@ -7,7 +7,8 @@ sudo pacman -S --needed --noconfirm \
   virt-manager \
   libvirt \
   dmidecode \
-  dnsmasq
+  dnsmasq \
+  gnome-themes-extra
 
 echo "==> Enabling libvirtd service..."
 sudo systemctl enable --now libvirtd
