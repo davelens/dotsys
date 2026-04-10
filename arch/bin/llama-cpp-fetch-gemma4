@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+model_dir="/var/lib/llama.cpp/models/gemma-4-26b-a4b-it"
+
+sudo mkdir -p "${model_dir}"
+sudo /usr/bin/hf download ggml-org/gemma-4-26B-A4B-it-GGUF \
+  gemma-4-26B-A4B-it-Q4_K_M.gguf \
+  mmproj-gemma-4-26B-A4B-it-f16.gguf \
+  --local-dir "${model_dir}"
+
+sudo chown -R llama-cpp:llama-cpp /var/lib/llama.cpp

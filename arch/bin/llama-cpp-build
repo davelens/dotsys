@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="/opt/rocm/llvm/bin:/opt/rocm/bin:${PATH}"
+export ROCM_PATH="/opt/rocm"
+export HIP_PATH="/opt/rocm"
+
+src_dir="/usr/local/src/llama.cpp"
+build_dir="${src_dir}/build"
+install_dir="/opt/llama.cpp"
+
+sudo mkdir -p /usr/local/src "${install_dir}/bin"
+
+if [ ! -d "${src_dir}/.git" ]; then
+  sudo git clone https://github.com/ggml-org/llama.cpp "${src_dir}"
+else
+  sudo git -C "${src_dir}" pull --ff-only
+fi
+
+sudo env PATH="${PATH}" ROCM_PATH="${ROCM_PATH}" HIP_PATH="${HIP_PATH}" \
+  cmake -S "${src_dir}" -B "${build_dir}" -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_HIP_COMPILER=/opt/rocm/llvm/bin/clang++ \
+  -DGGML_HIP=ON \
+  -DGGML_VULKAN=ON \
+  -DGPU_TARGETS="gfx1102;gfx1150" \
+  -DCMAKE_INSTALL_PREFIX="${install_dir}"
+
+sudo env PATH="${PATH}" ROCM_PATH="${ROCM_PATH}" HIP_PATH="${HIP_PATH}" \
+  cmake --build "${build_dir}" --target llama-cli llama-server llama-bench -j "$(nproc)"
+
+sudo install -m 0755 "${build_dir}/bin/llama-cli" "${install_dir}/bin/llama-cli"
+sudo install -m 0755 "${build_dir}/bin/llama-server" "${install_dir}/bin/llama-server"
+sudo install -m 0755 "${build_dir}/bin/llama-bench" "${install_dir}/bin/llama-bench"
