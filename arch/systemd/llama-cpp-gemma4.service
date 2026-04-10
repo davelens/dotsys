@@ -1,0 +1,30 @@
+[Unit]
+Description=llama.cpp Gemma4 26B local API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=llama-cpp
+Group=llama-cpp
+SupplementaryGroups=render video
+WorkingDirectory=/var/lib/llama.cpp
+EnvironmentFile=/etc/llama-cpp/gemma4.env
+ExecStart=/opt/llama.cpp/bin/llama-server \
+  --model ${LLAMA_CPP_MODEL} \
+  --mmproj ${LLAMA_CPP_MMPROJ} \
+  --host ${LLAMA_ARG_HOST} \
+  --port ${LLAMA_ARG_PORT} \
+  --alias ${LLAMA_ARG_ALIAS} \
+  --ctx-size ${LLAMA_ARG_CTX_SIZE} \
+  --cache-type-k ${LLAMA_ARG_CACHE_TYPE_K} \
+  --cache-type-v ${LLAMA_ARG_CACHE_TYPE_V} \
+  --batch-size ${LLAMA_ARG_BATCH_SIZE} \
+  --ubatch-size ${LLAMA_ARG_UBATCH_SIZE} \
+  --parallel ${LLAMA_ARG_PARALLEL} \
+  --n-gpu-layers ${LLAMA_ARG_N_GPU_LAYERS}
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
