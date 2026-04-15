@@ -4,13 +4,13 @@ set -euo pipefail
 SYSFS_ROOT="${GPU_CHECK_SYSFS_ROOT:-/sys}"
 DRM_ROOT="$SYSFS_ROOT/class/drm"
 
-DEVICE_WIDTH=28
+DEVICE_WIDTH=38
 ROLE_WIDTH=5
 BAR_WIDTH=20
 USE_WIDTH=$(( BAR_WIDTH + 1 + 3 ))
-TEMP_WIDTH=6
-VRAM_WIDTH=10
-# Sysfs reads on idle AMD GPUs can block indefinitely (gfxoff).
+TEMP_WIDTH=4
+VRAM_WIDTH=16
+# Sysfs reads on idle GPUs can block indefinitely (e.g. AMD gfxoff).
 # All sysfs reads go through this wrapper.
 SYSFS_TIMEOUT="${GPU_CHECK_SYSFS_TIMEOUT:-1}"
 
@@ -110,7 +110,7 @@ fi
 usage() {
   echo "Usage: $(basename "$0") [--help]"
   echo
-  echo "Show current AMD dGPU vs iGPU load and print a verdict."
+  echo "Show current GPU load, temperature, and VRAM usage."
   exit 0
 }
 
@@ -128,10 +128,31 @@ read_uevent_value() {
 human_bytes() {
   local bytes="$1"
 
-  if (( bytes >= 1073741824 )); then
+  if [[ "$bytes" == "-" ]]; then
+    printf '%s' "-"
+  elif (( bytes >= 1073741824 )); then
     awk -v bytes="$bytes" 'BEGIN { printf "%.1f GiB", bytes / 1073741824 }'
   else
     awk -v bytes="$bytes" 'BEGIN { printf "%.0f MiB", bytes / 1048576 }'
+  fi
+}
+
+# Format VRAM as "used / total" in the same unit, or "-" when unavailable.
+human_vram() {
+  local used="$1"
+  local total="$2"
+
+  if [[ "$used" == "-" || "$total" == "-" ]]; then
+    printf '%s' "-"
+    return
+  fi
+
+  if (( total >= 1073741824 )); then
+    awk -v u="$used" -v t="$total" \
+      'BEGIN { printf "%.1f / %.0f GiB", u / 1073741824, t / 1073741824 }'
+  else
+    awk -v u="$used" -v t="$total" \
+      'BEGIN { printf "%.0f / %.0f MiB", u / 1048576, t / 1048576 }'
   fi
 }
 
@@ -324,11 +345,19 @@ print_row() {
   local role="$2"
   local busy="$3"
   local temp="$4"
-  local vram="$5"
+  local vram_used="$5"
+  local vram_total="$6"
   local busy_text busy_color role_color temp_text
 
-  busy_text="$(render_busy_bar "$busy")"
-  busy_color="$(bar_color "$busy")"
+  if [[ "$busy" == "-" ]]; then
+    # Right-align the dash within the USE_WIDTH column.
+    local dash_pad=$(( USE_WIDTH - 1 ))
+    busy_text="$(repeat_char ' ' "$dash_pad")-"
+    busy_color="$COLOR_TEXT"
+  else
+    busy_text="$(render_busy_bar "$busy")"
+    busy_color="$(bar_color "$busy")"
+  fi
 
   # Manual right-align: printf %*s miscounts multibyte ° character.
   # Visual columns: "-" = 1, "36°" = 3 (digits + degree symbol = 1 col each).
@@ -363,7 +392,7 @@ print_row() {
     "$role_color" "$ROLE_WIDTH" "$role" "$COLOR_RESET$COLOR_BORDER" \
     "$busy_color" "$busy_text" "$COLOR_RESET$COLOR_BORDER" \
     "$COLOR_TEXT" "$temp_text" "$COLOR_RESET$COLOR_BORDER" \
-    "$COLOR_TEXT" "$VRAM_WIDTH" "$(human_bytes "$vram")" "$COLOR_RESET$COLOR_BORDER" \
+    "$COLOR_TEXT" "$VRAM_WIDTH" "$(human_vram "$vram_used" "$vram_total")" "$COLOR_RESET$COLOR_BORDER" \
     "$COLOR_RESET"
 }
 
@@ -385,75 +414,138 @@ collect_gpu() {
 
   [[ -f "$uevent" ]] || return 1
 
-  local driver
-  driver="$(read_uevent_value "$uevent" DRIVER 2>/dev/null || true)"
-  [[ "$driver" == "amdgpu" ]] || return 1
-
   local busy_file="$render_path/device/gpu_busy_percent"
-  local vram_file="$render_path/device/mem_info_vram_used"
 
-  if [[ ! -r "$busy_file" || ! -r "$vram_file" ]]; then
-    echo "Error: Missing AMD GPU counters under $render_path/device" >&2
-    exit 2
-  fi
+  # Skip GPUs that don't expose gpu_busy_percent.
+  [[ -r "$busy_file" ]] || return 1
 
-  local pci_class slot pci_id busy vram name role temp
+  local vram_used_file="$render_path/device/mem_info_vram_used"
+  local vram_total_file="$render_path/device/mem_info_vram_total"
+
+  local pci_class slot pci_id busy vram_used vram_total name role temp
   pci_class="$(read_uevent_value "$uevent" PCI_CLASS 2>/dev/null || true)"
   slot="$(read_uevent_value "$uevent" PCI_SLOT_NAME 2>/dev/null || true)"
   pci_id="$(read_uevent_value "$uevent" PCI_ID 2>/dev/null || true)"
   busy="$(sysfs_read "$busy_file" "0")"
   busy="${busy%%[[:space:]]}"
-  vram="$(sysfs_read "$vram_file" "0")"
-  vram="${vram%%[[:space:]]}"
+  if [[ -r "$vram_used_file" ]]; then
+    vram_used="$(sysfs_read "$vram_used_file" "0")"
+    vram_used="${vram_used%%[[:space:]]}"
+  else
+    vram_used="-"
+  fi
+  if [[ -r "$vram_total_file" ]]; then
+    vram_total="$(sysfs_read "$vram_total_file" "0")"
+    vram_total="${vram_total%%[[:space:]]}"
+  else
+    vram_total="-"
+  fi
   role="$(classify_role "$pci_class")"
   name="$(friendly_name "$slot" "$pci_id")"
   temp="$(read_temp "$render_path")"
 
-  printf '%s\t%s\t%s\t%s\t%s\n' "$role" "$name" "$busy" "$temp" "$vram"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$role" "$name" "$busy" "$temp" "$vram_used" "$vram_total"
+}
+
+# Find nvidia-smi: check $PATH first, then the WSL2 library path.
+find_nvidia_smi() {
+  local smi
+  smi="$(command -v nvidia-smi 2>/dev/null || true)"
+  [[ -n "$smi" ]] && printf '%s' "$smi" && return 0
+
+  for _p in /usr/lib/wsl/lib/nvidia-smi; do
+    [[ -x "$_p" ]] && printf '%s' "$_p" && return 0
+  done
+
+  return 1
+}
+
+# Collect GPU lines from nvidia-smi (NVIDIA / WSL2 fallback).
+collect_nvidia_gpus() {
+  local smi
+  smi="$(find_nvidia_smi)" || return 1
+
+  local csv
+  csv="$(timeout 5 "$smi" \
+    --query-gpu=name,utilization.gpu,temperature.gpu,memory.used,memory.total \
+    --format=csv,noheader,nounits 2>/dev/null || true)"
+  [[ -n "$csv" ]] || return 1
+
+  while IFS=',' read -r raw_name raw_busy raw_temp raw_used raw_total; do
+    # Trim leading/trailing whitespace.
+    local name busy temp vram_used vram_total vram role
+    name="${raw_name#"${raw_name%%[! ]*}"}"
+    name="${name%"${name##*[! ]}"}"
+    busy="${raw_busy#"${raw_busy%%[! ]*}"}"
+    busy="${busy%"${busy##*[! ]}"}"
+    temp="${raw_temp#"${raw_temp%%[! ]*}"}"
+    temp="${temp%"${temp##*[! ]}"}"
+    vram_used="${raw_used#"${raw_used%%[! ]*}"}"
+    vram_used="${vram_used%"${vram_used##*[! ]}"}"
+    vram_total="${raw_total#"${raw_total%%[! ]*}"}"
+    vram_total="${vram_total%"${vram_total##*[! ]}"}"
+
+    # Convert MiB to bytes for human_vram().
+    local vram_used_bytes vram_total_bytes
+    if [[ "$vram_used" =~ ^[0-9]+$ ]]; then
+      vram_used_bytes=$(( vram_used * 1048576 ))
+    else
+      vram_used_bytes="-"
+    fi
+    if [[ "$vram_total" =~ ^[0-9]+$ ]]; then
+      vram_total_bytes=$(( vram_total * 1048576 ))
+    else
+      vram_total_bytes="-"
+    fi
+
+    # nvidia-smi doesn't distinguish dGPU/iGPU; label as GPU.
+    role="GPU"
+
+    # Truncate name to fit the column.
+    if (( ${#name} > DEVICE_WIDTH )); then
+      name="$(printf '%.'"$((DEVICE_WIDTH - 3))"'s...' "$name")"
+    fi
+
+    [[ "$busy" =~ ^[0-9]+$ ]] || busy="-"
+    [[ "$temp" =~ ^[0-9]+$ ]] || temp="-"
+
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$role" "$name" "$busy" "$temp" "$vram_used_bytes" "$vram_total_bytes"
+  done <<<"$csv"
 }
 
 [[ $# -gt 0 && "$1" =~ ^(-h|--help)$ ]] && usage
 
-if [[ ! -d "$DRM_ROOT" ]]; then
-  echo "Error: DRM sysfs root not found at $DRM_ROOT" >&2
-  exit 2
-fi
-
 shopt -s nullglob
 
-dgpu_line=""
-igpu_line=""
-unknown_lines=()
+gpu_lines=()
 
-for render_path in "$DRM_ROOT"/renderD*; do
-  line="$(collect_gpu "$render_path" || true)"
-  [[ -n "$line" ]] || continue
+# Primary: DRM sysfs render nodes (native Linux / AMD / Intel).
+if [[ -d "$DRM_ROOT" ]]; then
+  for render_path in "$DRM_ROOT"/renderD*; do
+    line="$(collect_gpu "$render_path" || true)"
+    [[ -n "$line" ]] || continue
+    gpu_lines+=("$line")
+  done
+fi
 
-  role="${line%%$'\t'*}"
+# Fallback: nvidia-smi (NVIDIA native + WSL2).
+if [[ ${#gpu_lines[@]} -eq 0 ]]; then
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    gpu_lines+=("$line")
+  done < <(collect_nvidia_gpus 2>/dev/null || true)
+fi
 
-  case "$role" in
-  dGPU)
-    dgpu_line="$line"
-    ;;
-  iGPU)
-    igpu_line="$line"
-    ;;
-  *)
-    unknown_lines+=("$line")
-    ;;
-  esac
-done
-
-if [[ -z "$dgpu_line" && -z "$igpu_line" && ${#unknown_lines[@]} -eq 0 ]]; then
-  echo "Error: No AMD GPUs found under $DRM_ROOT" >&2
+if [[ ${#gpu_lines[@]} -eq 0 ]]; then
+  echo "Error: No GPUs found (checked DRM sysfs and nvidia-smi)" >&2
   exit 2
 fi
 
 # Recalculate USE_WIDTH: bar is fixed, column grows if any value hits 100%.
 max_busy=0
-for _line in "$dgpu_line" "$igpu_line" "${unknown_lines[@]}"; do
-  [[ -n "$_line" ]] || continue
+for _line in "${gpu_lines[@]}"; do
   IFS=$'\t' read -r _ _ _busy _ _ <<<"$_line"
+  [[ "$_busy" == "-" ]] && continue
   (( _busy > max_busy )) && max_busy=$_busy
 done
 max_pct_len=${#max_busy}
@@ -466,39 +558,32 @@ border_line '├' '─' '┬' '┤'
 print_header_row
 border_line '├' '─' '┼' '┤'
 
-if [[ -n "$dgpu_line" ]]; then
-  IFS=$'\t' read -r role name busy temp vram <<<"$dgpu_line"
-  print_row "$name" "$role" "$busy" "$temp" "$vram"
-fi
-
-if [[ -n "$igpu_line" ]]; then
-  IFS=$'\t' read -r role name busy temp vram <<<"$igpu_line"
-  print_row "$name" "$role" "$busy" "$temp" "$vram"
-fi
-
-for line in "${unknown_lines[@]}"; do
-  IFS=$'\t' read -r role name busy temp vram <<<"$line"
-  print_row "$name" "$role" "$busy" "$temp" "$vram"
+for line in "${gpu_lines[@]}"; do
+  IFS=$'\t' read -r role name busy temp vram_used vram_total <<<"$line"
+  print_row "$name" "$role" "$busy" "$temp" "$vram_used" "$vram_total"
 done
 
-if [[ -z "$dgpu_line" || -z "$igpu_line" ]]; then
+# Only print a verdict when there are 2+ GPUs to compare.
+if (( ${#gpu_lines[@]} >= 2 )); then
+  # Find the busiest GPU.
+  best_name=""
+  best_busy=0
+  for _line in "${gpu_lines[@]}"; do
+    IFS=$'\t' read -r _role _name _busy _ _ <<<"$_line"
+    [[ "$_busy" == "-" ]] && continue
+    if (( _busy > best_busy )); then
+      best_busy=$_busy
+      best_name="$_name"
+    fi
+  done
+
   border_line '├' '─' '┴' '┤'
-  print_verdict_row 'Verdict: cannot compare dGPU vs iGPU on this host'
+  if (( best_busy > 0 )); then
+    print_verdict_row "Verdict: $best_name is dominant (${best_busy}%)"
+  else
+    print_verdict_row 'Verdict: no GPU is dominant right now'
+  fi
   printf '%s%s%s\n' "$COLOR_BORDER" "╰$(repeat_char '─' "$(table_inner_width)")╯" "$COLOR_RESET"
-  exit 2
+else
+  border_line '╰' '─' '┴' '╯'
 fi
-
-IFS=$'\t' read -r _ _ dgpu_busy _ _ <<<"$dgpu_line"
-IFS=$'\t' read -r _ _ igpu_busy _ _ <<<"$igpu_line"
-
-if (( dgpu_busy > igpu_busy )); then
-  border_line '├' '─' '┴' '┤'
-  print_verdict_row 'Verdict: dGPU active and dominant'
-  printf '%s%s%s\n' "$COLOR_BORDER" "╰$(repeat_char '─' "$(table_inner_width)")╯" "$COLOR_RESET"
-  exit 0
-fi
-
-border_line '├' '─' '┴' '┤'
-print_verdict_row 'Verdict: dGPU not dominant right now'
-printf '%s%s%s\n' "$COLOR_BORDER" "╰$(repeat_char '─' "$(table_inner_width)")╯" "$COLOR_RESET"
-exit 1
