@@ -6,7 +6,8 @@ DRM_ROOT="$SYSFS_ROOT/class/drm"
 
 DEVICE_WIDTH=28
 ROLE_WIDTH=5
-USE_WIDTH=20
+BAR_WIDTH=20
+USE_WIDTH=$(( BAR_WIDTH + 1 + 3 ))
 TEMP_WIDTH=6
 VRAM_WIDTH=10
 # Sysfs reads on idle AMD GPUs can block indefinitely (gfxoff).
@@ -254,24 +255,27 @@ bar_color() {
 
 render_busy_bar() {
   local busy="$1"
-  local pct_text
-  pct_text="$(printf '%3s%%' "$busy")"
-  local pct_len=4
-  local bar_space=$(( USE_WIDTH - pct_len - 1 ))
-  local filled=$(( busy * bar_space / 100 ))
-  local empty=$(( bar_space - filled ))
+  local pct_text="${busy}%"
+  local pct_len=${#pct_text}
+  # Right-align percentage within the space after the bar.
+  local pct_pad=$(( USE_WIDTH - BAR_WIDTH - pct_len ))
+  local filled=$(( busy * BAR_WIDTH / 100 ))
+  local empty=$(( BAR_WIDTH - filled ))
 
   if (( busy > 0 && filled == 0 )); then
     filled=1
-    empty=$(( bar_space - filled ))
+    empty=$(( BAR_WIDTH - filled ))
   fi
 
   # Manual padding: printf %*s miscounts multibyte █ characters.
   # Empty bar space gets a dark green background to show full bar width.
+  # The gap between bar and percentage is included in the bg region,
+  # leaving only a single plain space as separator.
+  local bg_extra=$(( pct_pad - 1 ))
   printf '%s%s%s%s %s' \
     "$(repeat_char '█' "$filled")" \
     "$COLOR_BAR_BG" \
-    "$(repeat_char ' ' "$empty")" \
+    "$(repeat_char ' ' $(( empty + bg_extra )))" \
     "$COLOR_RESET" \
     "$pct_text"
 }
@@ -444,6 +448,17 @@ if [[ -z "$dgpu_line" && -z "$igpu_line" && ${#unknown_lines[@]} -eq 0 ]]; then
   echo "Error: No AMD GPUs found under $DRM_ROOT" >&2
   exit 2
 fi
+
+# Recalculate USE_WIDTH: bar is fixed, column grows if any value hits 100%.
+max_busy=0
+for _line in "$dgpu_line" "$igpu_line" "${unknown_lines[@]}"; do
+  [[ -n "$_line" ]] || continue
+  IFS=$'\t' read -r _ _ _busy _ _ <<<"$_line"
+  (( _busy > max_busy )) && max_busy=$_busy
+done
+max_pct_len=${#max_busy}
+(( max_pct_len < 2 )) && max_pct_len=2
+USE_WIDTH=$(( BAR_WIDTH + 1 + max_pct_len + 1 ))
 
 printf '%s%s%s\n' "$COLOR_BORDER" "╭$(repeat_char '─' "$(table_inner_width)")╮" "$COLOR_RESET"
 print_title_row
