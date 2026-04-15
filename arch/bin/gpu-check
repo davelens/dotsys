@@ -320,15 +320,16 @@ print_row() {
   busy_text="$(render_busy_bar "$busy")"
   busy_color="$(bar_color "$busy")"
 
-  # Manual right-align: printf %*s miscounts multibyte ° character
-  local temp_val
+  # Manual right-align: printf %*s miscounts multibyte ° character.
+  # Visual columns: "-" = 1, "36°" = 3 (digits + degree symbol = 1 col each).
+  local temp_val temp_val_cols
   if [[ "$temp" == "-" ]]; then
     temp_val="-"
+    temp_val_cols=1
   else
     temp_val="${temp}°"
+    temp_val_cols=$(( ${#temp} + 1 ))
   fi
-  local temp_val_cols=${#temp}
-  (( temp_val_cols += 1 ))
   local temp_pad=$(( TEMP_WIDTH - temp_val_cols ))
   temp_text="$(repeat_char ' ' "$temp_pad")${temp_val}"
 
