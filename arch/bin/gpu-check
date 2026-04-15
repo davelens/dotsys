@@ -88,9 +88,11 @@ if [[ -t 1 && "${TERM:-}" != "dumb" ]]; then
   COLOR_TEXT=$'\033[38;5;252m'
   COLOR_DGPU=$'\033[38;5;39m'
   COLOR_IGPU=$'\033[38;5;213m'
-  COLOR_GOOD=$'\033[38;5;46m'
-  COLOR_WARN=$'\033[38;5;220m'
-  COLOR_BAD=$'\033[38;5;196m'
+  # duf dark theme palette
+  COLOR_GOOD=$'\033[38;2;168;204;140m'
+  COLOR_WARN=$'\033[38;2;219;171;121m'
+  COLOR_BAD=$'\033[38;2;232;131;136m'
+  COLOR_BAR_BG=$'\033[48;2;27;45;27m'
 else
   COLOR_RESET=''
   COLOR_BORDER=''
@@ -101,6 +103,7 @@ else
   COLOR_GOOD=''
   COLOR_WARN=''
   COLOR_BAD=''
+  COLOR_BAR_BG=''
 fi
 
 usage() {
@@ -263,10 +266,13 @@ render_busy_bar() {
     empty=$(( bar_space - filled ))
   fi
 
-  # Manual padding: printf %*s miscounts multibyte █ characters
-  printf '%s%s %s' \
+  # Manual padding: printf %*s miscounts multibyte █ characters.
+  # Empty bar space gets a dark green background to show full bar width.
+  printf '%s%s%s%s %s' \
     "$(repeat_char '█' "$filled")" \
+    "$COLOR_BAR_BG" \
     "$(repeat_char ' ' "$empty")" \
+    "$COLOR_RESET" \
     "$pct_text"
 }
 
