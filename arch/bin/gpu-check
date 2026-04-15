@@ -24,25 +24,62 @@ sysfs_read() {
   fi
 }
 
-# Cache lspci output once at startup (like neofetch).
-# lspci reads PCI config space which can take a few seconds when a GPU is
-# in gfxoff, but it does complete — it just needs a generous timeout.
-declare -A LSPCI_CACHE=()
+# Resolve device names from the local pci.ids database (no PCI bus access).
+# lspci reads PCI config space which blocks when the dGPU is in gfxoff or
+# under heavy load. pci.ids is a flat file lookup — instant and safe.
+# For device IDs too new for pci.ids, fall back to a targeted single-slot
+# lspci query (safe for the iGPU which never enters gfxoff).
+PCIIDS_FILE=""
+for _f in /usr/share/hwdata/pci.ids /usr/share/misc/pci.ids /usr/share/pci.ids; do
+  [[ -r "$_f" ]] && PCIIDS_FILE="$_f" && break
+done
 
-cache_lspci() {
-  command -v lspci >/dev/null 2>&1 || return 0
+lookup_pciids() {
+  local vendor_id="$1"
+  local device_id="$2"
 
-  local raw
-  raw="$(timeout 5 lspci -mm 2>/dev/null || true)"
-  [[ -n "$raw" ]] || return 0
+  [[ -n "$PCIIDS_FILE" ]] || return 1
+
+  local in_vendor=0
 
   while IFS= read -r line; do
-    local slot="${line%% *}"
-    LSPCI_CACHE["$slot"]="$line"
-  done <<<"$raw"
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "$line" ]] && continue
+
+    if [[ ! "$line" =~ ^$'\t' ]]; then
+      if [[ "$line" =~ ^"$vendor_id " ]]; then
+        in_vendor=1
+      elif (( in_vendor )); then
+        break
+      fi
+      continue
+    fi
+
+    if (( in_vendor )) && [[ "$line" =~ ^$'\t'"$device_id " ]]; then
+      local name="${line#*"$device_id "}"
+      name="${name#"${name%%[! ]*}"}"
+      printf '%s' "$name"
+      return 0
+    fi
+  done <"$PCIIDS_FILE"
+
+  return 1
 }
 
-cache_lspci
+lookup_lspci_slot() {
+  local short_slot="$1"
+
+  command -v lspci >/dev/null 2>&1 || return 1
+
+  local raw
+  raw="$(timeout 2 lspci -mm -s "$short_slot" 2>/dev/null || true)"
+  [[ -n "$raw" ]] || return 1
+
+  local parsed
+  parsed="$(awk -F'"' '{print $6}' <<<"$raw")"
+  [[ -n "$parsed" ]] && printf '%s' "$parsed" && return 0
+  return 1
+}
 
 if [[ -t 1 && "${TERM:-}" != "dumb" ]]; then
   COLOR_RESET=$'\033[0m'
@@ -97,15 +134,21 @@ human_bytes() {
 friendly_name() {
   local slot="$1"
   local pci_id="$2"
+  local vendor_id="${pci_id%%:*}"
+  local device_id="${pci_id##*:}"
   local short_slot="${slot#0000:}"
-  local name="$pci_id"
+  local name=""
 
-  if [[ -n "${LSPCI_CACHE[$short_slot]+x}" ]]; then
-    local line="${LSPCI_CACHE[$short_slot]}"
-    local parsed
-    parsed="$(awk -F'"' '{print $6}' <<<"$line")"
-    [[ -n "$parsed" ]] && name="$parsed"
+  # Primary: pci.ids file (instant, no PCI bus access)
+  name="$(lookup_pciids "$vendor_id" "$device_id" 2>/dev/null || true)"
+
+  # Fallback: targeted lspci query for IDs not in pci.ids
+  if [[ -z "$name" ]]; then
+    name="$(lookup_lspci_slot "$short_slot" 2>/dev/null || true)"
   fi
+
+  # Last resort: raw PCI ID
+  [[ -z "$name" ]] && name="$pci_id"
 
   if [[ "$name" =~ \[(.*)\] ]]; then
     name="${BASH_REMATCH[1]}"
