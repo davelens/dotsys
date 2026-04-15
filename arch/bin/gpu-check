@@ -4,6 +4,32 @@ set -euo pipefail
 SYSFS_ROOT="${GPU_CHECK_SYSFS_ROOT:-/sys}"
 DRM_ROOT="$SYSFS_ROOT/class/drm"
 
+DEVICE_WIDTH=28
+ROLE_WIDTH=5
+BUSY_WIDTH=20
+VRAM_WIDTH=10
+BAR_WIDTH=12
+
+if [[ -t 1 && "${TERM:-}" != "dumb" ]]; then
+  COLOR_RESET=$'\033[0m'
+  COLOR_BORDER=$'\033[38;5;246m'
+  COLOR_HEADER=$'\033[1;38;5;255m'
+  COLOR_DGPU=$'\033[38;5;39m'
+  COLOR_IGPU=$'\033[38;5;213m'
+  COLOR_GOOD=$'\033[38;5;46m'
+  COLOR_WARN=$'\033[38;5;220m'
+  COLOR_BAD=$'\033[38;5;196m'
+else
+  COLOR_RESET=''
+  COLOR_BORDER=''
+  COLOR_HEADER=''
+  COLOR_DGPU=''
+  COLOR_IGPU=''
+  COLOR_GOOD=''
+  COLOR_WARN=''
+  COLOR_BAD=''
+fi
+
 usage() {
   echo "Usage: $(basename "$0") [--help]"
   echo
@@ -73,6 +99,130 @@ classify_role() {
   esac
 }
 
+repeat_char() {
+  local char="$1"
+  local count="$2"
+  local out=""
+
+  while (( count > 0 )); do
+    out+="$char"
+    ((count--))
+  done
+
+  printf '%s' "$out"
+}
+
+cell_width() {
+  local width="$1"
+  printf '%s' $((width + 2))
+}
+
+table_inner_width() {
+  printf '%s' $(( $(cell_width "$DEVICE_WIDTH") + $(cell_width "$ROLE_WIDTH") + $(cell_width "$BUSY_WIDTH") + $(cell_width "$VRAM_WIDTH") + 3 ))
+}
+
+border_line() {
+  local left="$1"
+  local fill="$2"
+  local join="$3"
+  local right="$4"
+
+  printf '%s%s%s%s%s%s%s%s%s\n' \
+    "$COLOR_BORDER$left" \
+    "$(repeat_char "$fill" "$(cell_width "$DEVICE_WIDTH")")" \
+    "$join" \
+    "$(repeat_char "$fill" "$(cell_width "$ROLE_WIDTH")")" \
+    "$join" \
+    "$(repeat_char "$fill" "$(cell_width "$BUSY_WIDTH")")" \
+    "$join" \
+    "$(repeat_char "$fill" "$(cell_width "$VRAM_WIDTH")")" \
+    "$right$COLOR_RESET"
+}
+
+bar_color() {
+  local busy="$1"
+
+  if (( busy >= 90 )); then
+    printf '%s' "$COLOR_BAD"
+  elif (( busy >= 50 )); then
+    printf '%s' "$COLOR_WARN"
+  else
+    printf '%s' "$COLOR_GOOD"
+  fi
+}
+
+render_busy_bar() {
+  local busy="$1"
+  local filled=$(( busy * BAR_WIDTH / 100 ))
+  local empty=$(( BAR_WIDTH - filled ))
+
+  if (( busy > 0 && filled == 0 )); then
+    filled=1
+    empty=$(( BAR_WIDTH - filled ))
+  fi
+
+
+  printf '%s %3s' \
+    "$(repeat_char '█' "$filled")$(repeat_char ' ' "$empty")" \
+    "${busy}%"
+}
+
+print_title_row() {
+  local title="GPU Check"
+  local padding=$(( $(table_inner_width) - ${#title} - 1 ))
+  printf '%s│ %s%s │%s\n' "$COLOR_BORDER" "$COLOR_HEADER$title$COLOR_RESET" "$(repeat_char ' ' "$padding")" "$COLOR_RESET"
+}
+
+print_header_row() {
+  printf '%s│ %s%-*s%s │ %s%-*s%s │ %s%-*s%s │ %s%-*s%s │%s\n' \
+    "$COLOR_BORDER" \
+    "$COLOR_HEADER" "$DEVICE_WIDTH" "DEVICE" "$COLOR_RESET$COLOR_BORDER" \
+    "$COLOR_HEADER" "$ROLE_WIDTH" "ROLE" "$COLOR_RESET$COLOR_BORDER" \
+    "$COLOR_HEADER" "$BUSY_WIDTH" "BUSY" "$COLOR_RESET$COLOR_BORDER" \
+    "$COLOR_HEADER" "$VRAM_WIDTH" "VRAM" "$COLOR_RESET$COLOR_BORDER" \
+    "$COLOR_RESET"
+}
+
+print_row() {
+  local name="$1"
+  local role="$2"
+  local busy="$3"
+  local vram="$4"
+  local role_text busy_text busy_color role_color
+
+  role_text="$role"
+  busy_text="$(render_busy_bar "$busy")"
+  busy_color="$(bar_color "$busy")"
+
+  case "$role" in
+  dGPU)
+    role_color="$COLOR_DGPU"
+    ;;
+  iGPU)
+    role_color="$COLOR_IGPU"
+    ;;
+  *)
+    role_color=''
+    ;;
+  esac
+
+  printf '%s│ %-*s │ %s%-*s%s │ %s%-*s%s │ %*s │%s\n' \
+    "$COLOR_BORDER" \
+    "$DEVICE_WIDTH" "$name" \
+    "$role_color" "$ROLE_WIDTH" "$role_text" "$COLOR_RESET$COLOR_BORDER" \
+    "$busy_color" "$BUSY_WIDTH" "$busy_text" "$COLOR_RESET$COLOR_BORDER" \
+    "$VRAM_WIDTH" "$(human_bytes "$vram")" \
+    "$COLOR_RESET"
+}
+
+print_verdict_row() {
+  local verdict="$1"
+  local width
+  width="$(table_inner_width)"
+  local padding=$(( width - ${#verdict} - 1 ))
+  printf '%s│ %s%s │%s\n' "$COLOR_BORDER" "$verdict" "$(repeat_char ' ' "$padding")" "$COLOR_RESET"
+}
+
 collect_gpu() {
   local render_path="$1"
   local uevent="$render_path/device/uevent"
@@ -101,15 +251,6 @@ collect_gpu() {
   name="$(friendly_name "$slot" "$pci_id")"
 
   printf '%s\t%s\t%s\t%s\n' "$role" "$name" "$busy" "$vram"
-}
-
-print_row() {
-  local name="$1"
-  local role="$2"
-  local busy="$3"
-  local vram="$4"
-
-  printf '%-28s %-5s %4s %10s\n' "$name" "$role" "${busy}%" "$(human_bytes "$vram")"
 }
 
 [[ $# -gt 0 && "$1" =~ ^(-h|--help)$ ]] && usage
@@ -149,9 +290,11 @@ if [[ -z "$dgpu_line" && -z "$igpu_line" && ${#unknown_lines[@]} -eq 0 ]]; then
   exit 2
 fi
 
-echo "GPU Check"
-echo
-printf '%-28s %-5s %4s %10s\n' "Device" "Role" "Busy" "VRAM Used"
+printf '%s%s%s\n' "$COLOR_BORDER" "╭$(repeat_char '─' "$(table_inner_width)")╮" "$COLOR_RESET"
+print_title_row
+border_line '├' '─' '┬' '┤'
+print_header_row
+border_line '├' '─' '┼' '┤'
 
 if [[ -n "$dgpu_line" ]]; then
   IFS=$'\t' read -r role name busy vram <<<"$dgpu_line"
@@ -168,10 +311,10 @@ for line in "${unknown_lines[@]}"; do
   print_row "$name" "$role" "$busy" "$vram"
 done
 
-echo
-
 if [[ -z "$dgpu_line" || -z "$igpu_line" ]]; then
-  echo "Verdict: cannot compare dGPU vs iGPU on this host"
+  border_line '├' '─' '┴' '┤'
+  print_verdict_row 'Verdict: cannot compare dGPU vs iGPU on this host'
+  printf '%s%s%s\n' "$COLOR_BORDER" "╰$(repeat_char '─' "$(table_inner_width)")╯" "$COLOR_RESET"
   exit 2
 fi
 
@@ -179,9 +322,13 @@ IFS=$'\t' read -r _ _ dgpu_busy _ <<<"$dgpu_line"
 IFS=$'\t' read -r _ _ igpu_busy _ <<<"$igpu_line"
 
 if (( dgpu_busy > igpu_busy )); then
-  echo "Verdict: dGPU active and dominant"
+  border_line '├' '─' '┴' '┤'
+  print_verdict_row 'Verdict: dGPU active and dominant'
+  printf '%s%s%s\n' "$COLOR_BORDER" "╰$(repeat_char '─' "$(table_inner_width)")╯" "$COLOR_RESET"
   exit 0
 fi
 
-echo "Verdict: dGPU not dominant right now"
+border_line '├' '─' '┴' '┤'
+print_verdict_row 'Verdict: dGPU not dominant right now'
+printf '%s%s%s\n' "$COLOR_BORDER" "╰$(repeat_char '─' "$(table_inner_width)")╯" "$COLOR_RESET"
 exit 1
