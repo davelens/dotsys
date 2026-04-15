@@ -209,8 +209,8 @@ bar_color() {
 render_busy_bar() {
   local busy="$1"
   local pct_text
-  pct_text="$(printf '%s%%' "$busy")"
-  local pct_len=${#pct_text}
+  pct_text="$(printf '%3s%%' "$busy")"
+  local pct_len=4
   local bar_space=$(( USE_WIDTH - pct_len - 1 ))
   local filled=$(( busy * bar_space / 100 ))
   local empty=$(( bar_space - filled ))
@@ -220,6 +220,7 @@ render_busy_bar() {
     empty=$(( bar_space - filled ))
   fi
 
+  # Manual padding: printf %*s miscounts multibyte █ characters
   printf '%s%s %s' \
     "$(repeat_char '█' "$filled")" \
     "$(repeat_char ' ' "$empty")" \
@@ -276,11 +277,17 @@ print_row() {
   busy_text="$(render_busy_bar "$busy")"
   busy_color="$(bar_color "$busy")"
 
+  # Manual right-align: printf %*s miscounts multibyte ° character
+  local temp_val
   if [[ "$temp" == "-" ]]; then
-    temp_text="$(printf '%*s' "$TEMP_WIDTH" "-")"
+    temp_val="-"
   else
-    temp_text="$(printf '%*s' "$TEMP_WIDTH" "${temp}°")"
+    temp_val="${temp}°"
   fi
+  local temp_val_cols=${#temp}
+  (( temp_val_cols += 1 ))
+  local temp_pad=$(( TEMP_WIDTH - temp_val_cols ))
+  temp_text="$(repeat_char ' ' "$temp_pad")${temp_val}"
 
   case "$role" in
   dGPU)
@@ -294,11 +301,13 @@ print_row() {
     ;;
   esac
 
-  printf '%s│ %s%-*s%s │ %s%-*s%s │ %s%-*s%s │ %s%s%s │ %s%*s%s │%s\n' \
+  # busy_text and temp_text are pre-padded to exact column width;
+  # do not use printf width specifiers on them (multibyte chars miscount).
+  printf '%s│ %s%-*s%s │ %s%-*s%s │ %s%s%s │ %s%s%s │ %s%*s%s │%s\n' \
     "$COLOR_BORDER" \
     "$COLOR_TEXT" "$DEVICE_WIDTH" "$name" "$COLOR_RESET$COLOR_BORDER" \
     "$role_color" "$ROLE_WIDTH" "$role" "$COLOR_RESET$COLOR_BORDER" \
-    "$busy_color" "$USE_WIDTH" "$busy_text" "$COLOR_RESET$COLOR_BORDER" \
+    "$busy_color" "$busy_text" "$COLOR_RESET$COLOR_BORDER" \
     "$COLOR_TEXT" "$temp_text" "$COLOR_RESET$COLOR_BORDER" \
     "$COLOR_TEXT" "$VRAM_WIDTH" "$(human_bytes "$vram")" "$COLOR_RESET$COLOR_BORDER" \
     "$COLOR_RESET"
