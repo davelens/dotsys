@@ -55,8 +55,8 @@ printf '%s\n' "$OUTPUT" | grep -q '1%'
 printf '%s\n' "$OUTPUT" | grep -q '█'
 
 # Temperature
-printf '%s\n' "$OUTPUT" | grep -q '61C'
-printf '%s\n' "$OUTPUT" | grep -q '44C'
+printf '%s\n' "$OUTPUT" | grep -q '61°'
+printf '%s\n' "$OUTPUT" | grep -q '44°'
 
 # Verdict
 printf '%s\n' "$OUTPUT" | grep -q 'Verdict: dGPU active and dominant'

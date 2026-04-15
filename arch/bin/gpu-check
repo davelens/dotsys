@@ -279,7 +279,7 @@ print_row() {
   if [[ "$temp" == "-" ]]; then
     temp_text="$(printf '%*s' "$TEMP_WIDTH" "-")"
   else
-    temp_text="$(printf '%*s' "$TEMP_WIDTH" "${temp}C")"
+    temp_text="$(printf '%*s' "$TEMP_WIDTH" "${temp}°")"
   fi
 
   case "$role" in
