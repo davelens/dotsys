@@ -263,7 +263,7 @@ print_title_row() {
   local title="GPU Check"
   local width
   width="$(table_inner_width)"
-  local padding=$(( width - ${#title} - 1 ))
+  local padding=$(( width - ${#title} - 2 ))
   printf '%s│ %s%s%s%s │%s\n' \
     "$COLOR_BORDER" \
     "$COLOR_HEADER" "$title" "$COLOR_RESET" \
@@ -341,7 +341,7 @@ print_verdict_row() {
   local verdict="$1"
   local width
   width="$(table_inner_width)"
-  local padding=$(( width - ${#verdict} - 1 ))
+  local padding=$(( width - ${#verdict} - 2 ))
   printf '%s│ %s%s%s%s │%s\n' \
     "$COLOR_BORDER" \
     "$COLOR_TEXT" "$verdict" "$COLOR_RESET" \
