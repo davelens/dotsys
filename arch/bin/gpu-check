@@ -24,59 +24,25 @@ sysfs_read() {
   fi
 }
 
-# Resolve PCI device names from the pci.ids database file instead of lspci.
-# lspci reads PCI config space, which blocks when a GPU is in gfxoff/idle.
-# The pci.ids file is a local database that requires no device access.
-declare -A PCIIDS_CACHE=()
+# Cache lspci output once at startup (like neofetch).
+# lspci reads PCI config space which can take a few seconds when a GPU is
+# in gfxoff, but it does complete — it just needs a generous timeout.
+declare -A LSPCI_CACHE=()
 
-PCIIDS_FILE=""
-for _f in /usr/share/hwdata/pci.ids /usr/share/misc/pci.ids /usr/share/pci.ids; do
-  [[ -r "$_f" ]] && PCIIDS_FILE="$_f" && break
-done
+cache_lspci() {
+  command -v lspci >/dev/null 2>&1 || return 0
 
-lookup_pci_device_name() {
-  local vendor_id="$1"
-  local device_id="$2"
-  local key="${vendor_id}:${device_id}"
-
-  if [[ -n "${PCIIDS_CACHE[$key]+x}" ]]; then
-    printf '%s' "${PCIIDS_CACHE[$key]}"
-    return 0
-  fi
-
-  if [[ -z "$PCIIDS_FILE" ]]; then
-    return 1
-  fi
-
-  local in_vendor=0 name=""
+  local raw
+  raw="$(timeout 5 lspci -mm 2>/dev/null || true)"
+  [[ -n "$raw" ]] || return 0
 
   while IFS= read -r line; do
-    # Skip comments and empty lines
-    [[ "$line" =~ ^[[:space:]]*# ]] && continue
-    [[ -z "$line" ]] && continue
-
-    # Vendor line (no leading tab)
-    if [[ ! "$line" =~ ^$'\t' ]]; then
-      if [[ "$line" =~ ^"$vendor_id " ]]; then
-        in_vendor=1
-      elif (( in_vendor )); then
-        break
-      fi
-      continue
-    fi
-
-    # Device line (one leading tab, inside our vendor block)
-    if (( in_vendor )) && [[ "$line" =~ ^$'\t'"$device_id " ]]; then
-      name="${line#*"$device_id "}"
-      name="${name#"${name%%[! ]*}"}"
-      break
-    fi
-  done <"$PCIIDS_FILE"
-
-  PCIIDS_CACHE["$key"]="$name"
-  [[ -n "$name" ]] && printf '%s' "$name" && return 0
-  return 1
+    local slot="${line%% *}"
+    LSPCI_CACHE["$slot"]="$line"
+  done <<<"$raw"
 }
+
+cache_lspci
 
 if [[ -t 1 && "${TERM:-}" != "dumb" ]]; then
   COLOR_RESET=$'\033[0m'
@@ -129,15 +95,16 @@ human_bytes() {
 }
 
 friendly_name() {
-  local pci_id="$1"
-  local vendor_id="${pci_id%%:*}"
-  local device_id="${pci_id##*:}"
-  local name=""
+  local slot="$1"
+  local pci_id="$2"
+  local short_slot="${slot#0000:}"
+  local name="$pci_id"
 
-  name="$(lookup_pci_device_name "$vendor_id" "$device_id" 2>/dev/null || true)"
-
-  if [[ -z "$name" ]]; then
-    name="$pci_id"
+  if [[ -n "${LSPCI_CACHE[$short_slot]+x}" ]]; then
+    local line="${LSPCI_CACHE[$short_slot]}"
+    local parsed
+    parsed="$(awk -F'"' '{print $6}' <<<"$line")"
+    [[ -n "$parsed" ]] && name="$parsed"
   fi
 
   if [[ "$name" =~ \[(.*)\] ]]; then
@@ -367,15 +334,16 @@ collect_gpu() {
     exit 2
   fi
 
-  local pci_class pci_id busy vram name role temp
+  local pci_class slot pci_id busy vram name role temp
   pci_class="$(read_uevent_value "$uevent" PCI_CLASS 2>/dev/null || true)"
+  slot="$(read_uevent_value "$uevent" PCI_SLOT_NAME 2>/dev/null || true)"
   pci_id="$(read_uevent_value "$uevent" PCI_ID 2>/dev/null || true)"
   busy="$(sysfs_read "$busy_file" "0")"
   busy="${busy%%[[:space:]]}"
   vram="$(sysfs_read "$vram_file" "0")"
   vram="${vram%%[[:space:]]}"
   role="$(classify_role "$pci_class")"
-  name="$(friendly_name "$pci_id")"
+  name="$(friendly_name "$slot" "$pci_id")"
   temp="$(read_temp "$render_path")"
 
   printf '%s\t%s\t%s\t%s\t%s\n' "$role" "$name" "$busy" "$temp" "$vram"
