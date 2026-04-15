@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SYSFS_ROOT="${GPU_CHECK_SYSFS_ROOT:-/sys}"
+DRM_ROOT="$SYSFS_ROOT/class/drm"
+
+usage() {
+  echo "Usage: $(basename "$0") [--help]"
+  echo
+  echo "Show current AMD dGPU vs iGPU load and print a verdict."
+  exit 0
+}
+
+read_uevent_value() {
+  local file="$1"
+  local key="$2"
+
+  while IFS='=' read -r current_key value; do
+    [[ "$current_key" == "$key" ]] && printf '%s\n' "$value" && return 0
+  done <"$file"
+
+  return 1
+}
+
+human_bytes() {
+  local bytes="$1"
+
+  if (( bytes >= 1073741824 )); then
+    awk -v bytes="$bytes" 'BEGIN { printf "%.1f GiB", bytes / 1073741824 }'
+  else
+    awk -v bytes="$bytes" 'BEGIN { printf "%.0f MiB", bytes / 1048576 }'
+  fi
+}
+
+friendly_name() {
+  local slot="$1"
+  local pci_id="$2"
+  local line=""
+  local name="$pci_id"
+
+  if command -v lspci >/dev/null 2>&1 && [[ -n "$slot" ]]; then
+    line="$(lspci -mm -s "${slot#0000:}" 2>/dev/null || true)"
+
+    if [[ -n "$line" ]]; then
+      name="$(awk -F'"' '{print $6}' <<<"$line")"
+    fi
+  fi
+
+  if [[ "$name" =~ \[(.*)\] ]]; then
+    name="${BASH_REMATCH[1]}"
+  fi
+
+  if (( ${#name} > 28 )); then
+    printf '%.25s...\n' "$name"
+  else
+    printf '%s\n' "$name"
+  fi
+}
+
+classify_role() {
+  local pci_class="$1"
+
+  case "$pci_class" in
+  30000)
+    echo "dGPU"
+    ;;
+  38000)
+    echo "iGPU"
+    ;;
+  *)
+    echo "GPU"
+    ;;
+  esac
+}
+
+collect_gpu() {
+  local render_path="$1"
+  local uevent="$render_path/device/uevent"
+
+  [[ -f "$uevent" ]] || return 1
+
+  local driver
+  driver="$(read_uevent_value "$uevent" DRIVER 2>/dev/null || true)"
+  [[ "$driver" == "amdgpu" ]] || return 1
+
+  local busy_file="$render_path/device/gpu_busy_percent"
+  local vram_file="$render_path/device/mem_info_vram_used"
+
+  if [[ ! -r "$busy_file" || ! -r "$vram_file" ]]; then
+    echo "Error: Missing AMD GPU counters under $render_path/device" >&2
+    exit 2
+  fi
+
+  local pci_class slot pci_id busy vram name role
+  pci_class="$(read_uevent_value "$uevent" PCI_CLASS 2>/dev/null || true)"
+  slot="$(read_uevent_value "$uevent" PCI_SLOT_NAME 2>/dev/null || true)"
+  pci_id="$(read_uevent_value "$uevent" PCI_ID 2>/dev/null || true)"
+  busy="$(<"$busy_file")"
+  vram="$(<"$vram_file")"
+  role="$(classify_role "$pci_class")"
+  name="$(friendly_name "$slot" "$pci_id")"
+
+  printf '%s\t%s\t%s\t%s\n' "$role" "$name" "$busy" "$vram"
+}
+
+print_row() {
+  local name="$1"
+  local role="$2"
+  local busy="$3"
+  local vram="$4"
+
+  printf '%-28s %-5s %4s %10s\n' "$name" "$role" "${busy}%" "$(human_bytes "$vram")"
+}
+
+[[ $# -gt 0 && "$1" =~ ^(-h|--help)$ ]] && usage
+
+if [[ ! -d "$DRM_ROOT" ]]; then
+  echo "Error: DRM sysfs root not found at $DRM_ROOT" >&2
+  exit 2
+fi
+
+shopt -s nullglob
+
+dgpu_line=""
+igpu_line=""
+unknown_lines=()
+
+for render_path in "$DRM_ROOT"/renderD*; do
+  line="$(collect_gpu "$render_path" || true)"
+  [[ -n "$line" ]] || continue
+
+  role="${line%%$'\t'*}"
+
+  case "$role" in
+  dGPU)
+    dgpu_line="$line"
+    ;;
+  iGPU)
+    igpu_line="$line"
+    ;;
+  *)
+    unknown_lines+=("$line")
+    ;;
+  esac
+done
+
+if [[ -z "$dgpu_line" && -z "$igpu_line" && ${#unknown_lines[@]} -eq 0 ]]; then
+  echo "Error: No AMD GPUs found under $DRM_ROOT" >&2
+  exit 2
+fi
+
+echo "GPU Check"
+echo
+printf '%-28s %-5s %4s %10s\n' "Device" "Role" "Busy" "VRAM Used"
+
+if [[ -n "$dgpu_line" ]]; then
+  IFS=$'\t' read -r role name busy vram <<<"$dgpu_line"
+  print_row "$name" "$role" "$busy" "$vram"
+fi
+
+if [[ -n "$igpu_line" ]]; then
+  IFS=$'\t' read -r role name busy vram <<<"$igpu_line"
+  print_row "$name" "$role" "$busy" "$vram"
+fi
+
+for line in "${unknown_lines[@]}"; do
+  IFS=$'\t' read -r role name busy vram <<<"$line"
+  print_row "$name" "$role" "$busy" "$vram"
+done
+
+echo
+
+if [[ -z "$dgpu_line" || -z "$igpu_line" ]]; then
+  echo "Verdict: cannot compare dGPU vs iGPU on this host"
+  exit 2
+fi
+
+IFS=$'\t' read -r _ _ dgpu_busy _ <<<"$dgpu_line"
+IFS=$'\t' read -r _ _ igpu_busy _ <<<"$igpu_line"
+
+if (( dgpu_busy > igpu_busy )); then
+  echo "Verdict: dGPU active and dominant"
+  exit 0
+fi
+
+echo "Verdict: dGPU not dominant right now"
+exit 1
