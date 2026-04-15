@@ -187,14 +187,26 @@ friendly_name() {
 }
 
 classify_role() {
-  local pci_class="$1"
+  local vendor_id="$1"
+  local vram_total="$2"
 
-  case "$pci_class" in
-  30000)
+  case "$vendor_id" in
+  10DE)
     echo "dGPU"
     ;;
-  38000)
+  8086)
     echo "iGPU"
+    ;;
+  1002)
+    if [[ "$vram_total" =~ ^[0-9]+$ ]]; then
+      if (( vram_total <= 1073741824 )); then
+        echo "iGPU"
+      else
+        echo "dGPU"
+      fi
+    else
+      echo "GPU"
+    fi
     ;;
   *)
     echo "GPU"
@@ -416,18 +428,19 @@ collect_gpu() {
 
   local busy_file="$render_path/device/gpu_busy_percent"
 
-  # Skip GPUs that don't expose gpu_busy_percent.
-  [[ -r "$busy_file" ]] || return 1
-
   local vram_used_file="$render_path/device/mem_info_vram_used"
   local vram_total_file="$render_path/device/mem_info_vram_total"
 
-  local pci_class slot pci_id busy vram_used vram_total name role temp
-  pci_class="$(read_uevent_value "$uevent" PCI_CLASS 2>/dev/null || true)"
+  local slot pci_id vendor_id busy vram_used vram_total name role temp
   slot="$(read_uevent_value "$uevent" PCI_SLOT_NAME 2>/dev/null || true)"
   pci_id="$(read_uevent_value "$uevent" PCI_ID 2>/dev/null || true)"
-  busy="$(sysfs_read "$busy_file" "0")"
-  busy="${busy%%[[:space:]]}"
+  vendor_id="${pci_id%%:*}"
+  if [[ -r "$busy_file" ]]; then
+    busy="$(sysfs_read "$busy_file" "0")"
+    busy="${busy%%[[:space:]]}"
+  else
+    busy="-"
+  fi
   if [[ -r "$vram_used_file" ]]; then
     vram_used="$(sysfs_read "$vram_used_file" "0")"
     vram_used="${vram_used%%[[:space:]]}"
@@ -440,9 +453,22 @@ collect_gpu() {
   else
     vram_total="-"
   fi
-  role="$(classify_role "$pci_class")"
+  role="$(classify_role "$vendor_id" "$vram_total")"
   name="$(friendly_name "$slot" "$pci_id")"
   temp="$(read_temp "$render_path")"
+
+  if [[ "$vendor_id" == "10DE" ]]; then
+    local nvidia_line nvidia_name nvidia_busy nvidia_temp nvidia_vram_used nvidia_vram_total
+    nvidia_line="$(lookup_nvidia_metrics "$slot" || true)"
+    if [[ -n "$nvidia_line" ]]; then
+      IFS=$'\t' read -r nvidia_name nvidia_busy nvidia_temp nvidia_vram_used nvidia_vram_total <<<"$nvidia_line"
+      [[ "$nvidia_name" != "-" ]] && name="$nvidia_name"
+      [[ "$nvidia_busy" != "-" ]] && busy="$nvidia_busy"
+      [[ "$nvidia_temp" != "-" ]] && temp="$nvidia_temp"
+      [[ "$nvidia_vram_used" != "-" ]] && vram_used="$nvidia_vram_used"
+      [[ "$nvidia_vram_total" != "-" ]] && vram_total="$nvidia_vram_total"
+    fi
+  fi
 
   printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$role" "$name" "$busy" "$temp" "$vram_used" "$vram_total"
 }
@@ -453,27 +479,79 @@ find_nvidia_smi() {
   smi="$(command -v nvidia-smi 2>/dev/null || true)"
   [[ -n "$smi" ]] && printf '%s' "$smi" && return 0
 
-  for _p in /usr/lib/wsl/lib/nvidia-smi; do
-    [[ -x "$_p" ]] && printf '%s' "$_p" && return 0
-  done
+  [[ -x /usr/lib/wsl/lib/nvidia-smi ]] && printf '%s' /usr/lib/wsl/lib/nvidia-smi && return 0
+
+  return 1
+}
+
+NVIDIA_SMI_CSV=""
+
+get_nvidia_smi_csv() {
+  [[ -n "$NVIDIA_SMI_CSV" ]] && printf '%s' "$NVIDIA_SMI_CSV" && return 0
+
+  local smi
+  smi="$(find_nvidia_smi)" || return 1
+
+  NVIDIA_SMI_CSV="$(timeout 5 "$smi" \
+    --query-gpu=pci.bus_id,name,utilization.gpu,temperature.gpu,memory.used,memory.total \
+    --format=csv,noheader,nounits 2>/dev/null || true)"
+
+  [[ -n "$NVIDIA_SMI_CSV" ]] || return 1
+  printf '%s' "$NVIDIA_SMI_CSV"
+}
+
+lookup_nvidia_metrics() {
+  local slot="$1"
+  local short_slot="${slot#0000:}"
+  local csv
+  csv="$(get_nvidia_smi_csv)" || return 1
+
+  while IFS=',' read -r raw_slot raw_name raw_busy raw_temp raw_used raw_total; do
+    local smi_slot name busy temp vram_used vram_total
+
+    smi_slot="${raw_slot#"${raw_slot%%[! ]*}"}"
+    smi_slot="${smi_slot%"${smi_slot##*[! ]}"}"
+    [[ "$smi_slot" == *":$short_slot" ]] || continue
+
+    name="${raw_name#"${raw_name%%[! ]*}"}"
+    name="${name%"${name##*[! ]}"}"
+    busy="${raw_busy#"${raw_busy%%[! ]*}"}"
+    busy="${busy%"${busy##*[! ]}"}"
+    temp="${raw_temp#"${raw_temp%%[! ]*}"}"
+    temp="${temp%"${temp##*[! ]}"}"
+    vram_used="${raw_used#"${raw_used%%[! ]*}"}"
+    vram_used="${vram_used%"${vram_used##*[! ]}"}"
+    vram_total="${raw_total#"${raw_total%%[! ]*}"}"
+    vram_total="${vram_total%"${vram_total##*[! ]}"}"
+
+    [[ "$busy" =~ ^[0-9]+$ ]] || busy="-"
+    [[ "$temp" =~ ^[0-9]+$ ]] || temp="-"
+    if [[ "$vram_used" =~ ^[0-9]+$ ]]; then
+      vram_used=$(( vram_used * 1048576 ))
+    else
+      vram_used="-"
+    fi
+    if [[ "$vram_total" =~ ^[0-9]+$ ]]; then
+      vram_total=$(( vram_total * 1048576 ))
+    else
+      vram_total="-"
+    fi
+
+    printf '%s\t%s\t%s\t%s\t%s\n' "$name" "$busy" "$temp" "$vram_used" "$vram_total"
+    return 0
+  done <<<"$csv"
 
   return 1
 }
 
 # Collect GPU lines from nvidia-smi (NVIDIA / WSL2 fallback).
 collect_nvidia_gpus() {
-  local smi
-  smi="$(find_nvidia_smi)" || return 1
-
   local csv
-  csv="$(timeout 5 "$smi" \
-    --query-gpu=name,utilization.gpu,temperature.gpu,memory.used,memory.total \
-    --format=csv,noheader,nounits 2>/dev/null || true)"
-  [[ -n "$csv" ]] || return 1
+  csv="$(get_nvidia_smi_csv)" || return 1
 
-  while IFS=',' read -r raw_name raw_busy raw_temp raw_used raw_total; do
+  while IFS=',' read -r _ raw_name raw_busy raw_temp raw_used raw_total; do
     # Trim leading/trailing whitespace.
-    local name busy temp vram_used vram_total vram role
+    local name busy temp vram_used vram_total role
     name="${raw_name#"${raw_name%%[! ]*}"}"
     name="${name%"${name##*[! ]}"}"
     busy="${raw_busy#"${raw_busy%%[! ]*}"}"
