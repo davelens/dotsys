@@ -1,0 +1,17 @@
+anthropics/skills@frontend-design
+github/awesome-copilot@arch-linux-triage
+github/awesome-copilot@web-coder
+juliusbrussee/caveman@caveman
+obra/superpowers@brainstorming
+obra/superpowers@dispatching-parallel-agents
+obra/superpowers@executing-plans
+obra/superpowers@requesting-code-review
+obra/superpowers@subagent-driven-development
+obra/superpowers@systematic-debugging
+obra/superpowers@using-git-worktrees
+obra/superpowers@using-superpowers
+obra/superpowers@verification-before-completion
+obra/superpowers@writing-plans
+obra/superpowers@writing-skills
+vercel-labs/skills@find-skills
+wshobson/agents@tailwind-design-system
