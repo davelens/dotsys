@@ -31,9 +31,15 @@ if [ "$FRESH_INSTALL" = true ]; then
   # Fresh install: root user already exists as superuser, just set password
   psql -U root -d postgres -c "ALTER USER root WITH PASSWORD 'root';"
 else
-  # Existing install: create root user if it doesn't exist
-  # Try to find an existing superuser to connect with
-  SUPERUSER=$(psql -U postgres -d postgres -tAc "SELECT rolname FROM pg_roles WHERE rolsuper LIMIT 1;" 2>/dev/null || echo "")
+  # Existing install: create root user if it doesn't exist. The bootstrap
+  # superuser may be the current OS user when the cluster was not made here.
+  SUPERUSER=""
+  SUPERUSER_CANDIDATES=(root postgres "$USER")
+  for candidate in "${SUPERUSER_CANDIDATES[@]}"; do
+    if [ -n "$candidate" ] && [ -z "$SUPERUSER" ]; then
+      SUPERUSER=$(psql -U "$candidate" -d postgres -tAc "SELECT current_user FROM pg_roles WHERE rolname = current_user AND rolsuper;" 2>/dev/null || echo "")
+    fi
+  done
   if [ -z "$SUPERUSER" ]; then
     echo "Error: Could not find a superuser to connect with"
     exit 1
