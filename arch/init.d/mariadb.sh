@@ -10,7 +10,7 @@ if command -v mariadb >/dev/null; then
 fi
 
 echo "Installing MariaDB LTS..."
-sudo pacman -S --needed --noconfirm mariadb-lts
+sudo pacman -S --needed --noconfirm mariadb
 
 echo "Initializing data directory..."
 sudo mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
