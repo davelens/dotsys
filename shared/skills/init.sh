@@ -6,8 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_TXT="$SCRIPT_DIR/skills.txt"
 AGENT_SKILLS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/agents/skills"
 CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/claude}"
-SKILLS_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/skills"
-SKILLS_LOCK="$SKILLS_STATE_DIR/.skills-lock.json"
+SKILLS_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+SKILLS_STATE_DIR="$SKILLS_STATE_HOME/skills"
 
 # ── Check that node is installed via mise ───────────────────────
 if ! command -v mise &>/dev/null; then
@@ -30,6 +30,12 @@ echo "[$ME] Installing skills from skills.txt"
 mkdir -p "$AGENT_SKILLS_DIR" "$SKILLS_STATE_DIR"
 cd "$SCRIPT_DIR"
 
+TMP_SKILLS_HOME="$(mktemp -d)"
+cleanup_tmp_skills_home() {
+  rm -rf "$TMP_SKILLS_HOME"
+}
+trap cleanup_tmp_skills_home EXIT
+
 while IFS= read -r line || [[ -n "$line" ]]; do
   # Skip empty lines and comments
   [[ -z "$line" || "$line" == \#* ]] && continue
@@ -37,39 +43,23 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   # Parse skill name: 'owner/repo@skill-name' -> 'skill-name'
   skill_name="${line##*@}"
 
-  if [[ -d "$AGENT_SKILLS_DIR/$skill_name" || -L "$AGENT_SKILLS_DIR/$skill_name" ]]; then
-    echo "[$ME] - $skill_name already installed, skipping."
+  echo "[$ME] - $line"
+  if ! HOME="$TMP_SKILLS_HOME" XDG_STATE_HOME="$SKILLS_STATE_HOME" npx skills add "$line" -g -a universal --yes >/dev/null 2>&1 </dev/null; then
+    echo "[$ME] WARNING: Failed to install '$line'" >&2
     continue
   fi
 
-  echo "[$ME] - $line"
-  npx skills add "$line" --yes >/dev/null 2>&1 </dev/null ||
-    echo "[$ME] WARNING: Failed to install '$line'" >&2
-done <"$SKILLS_TXT"
-
-# ── Move freshly-installed skills to the central target ─────────
-LOCAL_SKILLS_DIR="$SCRIPT_DIR/.agents/skills"
-if [[ -d "$LOCAL_SKILLS_DIR" ]]; then
-  echo "[$ME]"
-  echo "[$ME] Moving installed skills to $AGENT_SKILLS_DIR"
-  for skill_dir in "$LOCAL_SKILLS_DIR"/*/; do
-    [[ -d "$skill_dir" ]] || continue
-    skill_dir="${skill_dir%/}"
-    skill_name="$(basename "$skill_dir")"
-    target="$AGENT_SKILLS_DIR/$skill_name"
-    if [[ -e "$target" || -L "$target" ]]; then
-      echo "[$ME] $skill_name already exists in target, skipping move."
-      continue
-    fi
-    mv "$skill_dir" "$target"
+  installed_skill_dir="$TMP_SKILLS_HOME/.agents/skills/$skill_name"
+  target="$AGENT_SKILLS_DIR/$skill_name"
+  if [[ -e "$target" || -L "$target" ]]; then
+    echo "[$ME] - $skill_name already installed, skipping move."
+  elif [[ -d "$installed_skill_dir" ]]; then
+    mv "$installed_skill_dir" "$target"
     echo "[$ME] - $skill_name -> $target"
-  done
-fi
-
-# ── Persist skills-lock.json to state dir ───────────────────────
-if [[ -f "$SCRIPT_DIR/skills-lock.json" ]]; then
-  mv -f "$SCRIPT_DIR/skills-lock.json" "$SKILLS_LOCK"
-fi
+  else
+    echo "[$ME] WARNING: Installed skill '$skill_name' was not found at $installed_skill_dir" >&2
+  fi
+done <"$SKILLS_TXT"
 
 # ── Clean up local install artifacts ────────────────────────────
 rm -rf "$SCRIPT_DIR/.agents" "$SCRIPT_DIR/.claude"
