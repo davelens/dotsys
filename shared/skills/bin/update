@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# I detest having dot folders in my $HOME and try to leverage XDG wherever I
+# can. Because `npx skills` always installs global skills in ~/.agents/skills
+# without a means to override that target path, I have to resort to this
+# fuckery to get the behaviour I want.
+
+ln -s ~/.config/agents/skills ~/.config/opencode/
+npx skills update -g
+rm -rf ~/.config/opencode/skills

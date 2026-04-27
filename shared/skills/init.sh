@@ -98,6 +98,22 @@ else
   echo "[$ME] No personal skills directory found at $PERSONAL_SKILLS_DIR, skipping symlinks."
 fi
 
+# ── Symlink skills utilities to dotfiles ────────────────────────
+echo "[$ME]"
+echo "[$ME] Symlinking binaries to dotfiles to enable \`u skills\`"
+
+SKILLS_BIN_DIR="$SCRIPT_DIR/bin"
+DOTFILES_UTILITIES_DIR="${DOTFILES_REPO_HOME:-$HOME/Repositories/davelens/dotfiles}/bin/utilities"
+DOTFILES_SKILLS_UTILITY="$DOTFILES_UTILITIES_DIR/skills"
+
+if [[ -d "$SKILLS_BIN_DIR" ]]; then
+  mkdir -p "$DOTFILES_UTILITIES_DIR"
+  ln -sfn "$SKILLS_BIN_DIR" "$DOTFILES_SKILLS_UTILITY"
+  echo "[$ME] - skills -> $SKILLS_BIN_DIR"
+else
+  echo "[$ME] No skills bin directory found at $SKILLS_BIN_DIR, skipping utility symlink."
+fi
+
 # ── Expose centralized skills to Claude Code ────────────────────
 
 if [[ -d "$CLAUDE_CONFIG_DIR" || -L "$CLAUDE_CONFIG_DIR" ]]; then

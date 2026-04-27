@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+[ -d ~/.config/agents/skills ] && rm -rf ~/.config/agents/skills/*
+[ -f "$XDG_STATE_HOME/skills/.skills-lock.json" ] && rm "$XDG_STATE_HOME/skills/.skills-lock.json"
