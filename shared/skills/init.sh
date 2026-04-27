@@ -2,7 +2,6 @@
 set -euo pipefail
 
 ME=${BASH_SOURCE[0]/\.\//}
-DOTFILES_REPO_HOME="${DOTFILES_REPO_HOME:-$HOME/Repositories/davelens/dotfiles}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_TXT="$SCRIPT_DIR/skills.txt"
 AGENT_SKILLS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/agents/skills"
@@ -75,13 +74,13 @@ fi
 # ── Clean up local install artifacts ────────────────────────────
 rm -rf "$SCRIPT_DIR/.agents" "$SCRIPT_DIR/.claude"
 
-# ── Symlink dotfiles agent-skills ───────────────────────────────
+# ── Symlink personal skills ─────────────────────────────────────
 echo "[$ME]"
-echo "[$ME] Symlinking skills from dotfiles"
+echo "[$ME] Symlinking personal skills"
 
-DOTFILES_SKILLS_DIR="$DOTFILES_REPO_HOME/agent-skills"
-if [[ -d "$DOTFILES_SKILLS_DIR" ]]; then
-  for skill_dir in "$DOTFILES_SKILLS_DIR"/*/; do
+PERSONAL_SKILLS_DIR="$SCRIPT_DIR/personal"
+if [[ -d "$PERSONAL_SKILLS_DIR" ]]; then
+  for skill_dir in "$PERSONAL_SKILLS_DIR"/*/; do
     [[ -d "$skill_dir" ]] || continue
     skill_dir="${skill_dir%/}"
     skill_name="$(basename "$skill_dir")"
@@ -96,7 +95,7 @@ if [[ -d "$DOTFILES_SKILLS_DIR" ]]; then
     fi
   done
 else
-  echo "[$ME] No agent-skills directory found at $DOTFILES_SKILLS_DIR, skipping symlinks."
+  echo "[$ME] No personal skills directory found at $PERSONAL_SKILLS_DIR, skipping symlinks."
 fi
 
 # ── Expose centralized skills to Claude Code ────────────────────
