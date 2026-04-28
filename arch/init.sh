@@ -12,6 +12,7 @@ DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 "$DOTSYS_REPO_HOME/arch/init.d/power-profiles.sh"
 "$DOTSYS_REPO_HOME/shared/gnupg/init.sh"
 "$DOTSYS_REPO_HOME/shared/skills/init.sh"
+"$DOTSYS_REPO_HOME/arch/misc.sh"
 
 # These are disabled because I either don't need them by default anymore,
 # or I want to install them delayed because they eat up too much time.
