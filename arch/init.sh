@@ -11,7 +11,6 @@ DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 "$DOTSYS_REPO_HOME/arch/init.d/kanata.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/power-profiles.sh"
 "$DOTSYS_REPO_HOME/shared/gnupg/init.sh"
-"$DOTSYS_REPO_HOME/shared/skills/init.sh"
 "$DOTSYS_REPO_HOME/arch/misc.sh"
 
 # These are disabled because I either don't need them by default anymore,
