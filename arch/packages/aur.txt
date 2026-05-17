@@ -3,9 +3,11 @@
 # That said, I've verified these packages as safe at this time of writing.
 
 annotator                           # Image annotation tool
+bluetui                             # Bluetooth connection manager
 clipboard-bin                       # Clipboard manager
 figlet-fonts                        # Additional figlet fonts (rectangles++)
 firefox-bin                         # Everyone's favourite fox
+impala                              # WiFi connection manager
 jqp-bin                             # Interactive jq playground
 lazysql-bin                         # TUI for SQL databases
 mycli                               # A MySQL CLI client with some QoL
