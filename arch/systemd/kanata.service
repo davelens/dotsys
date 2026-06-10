@@ -3,6 +3,9 @@ Description=Kanata keyboard remapper
 Documentation=https://github.com/jtroo/kanata
 
 [Service]
+# Lingering starts this at boot before input devices/seat are ready, causing
+# "No keyboard devices were found" until a device appears. Wait first.
+ExecStartPre=/usr/bin/sleep 3
 ExecStart=/usr/bin/kanata --cfg %h/.config/kanata/internal.kbd
 Restart=on-failure
 RestartSec=3

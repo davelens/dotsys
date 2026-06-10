@@ -5,9 +5,14 @@ DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 # Enable lingering so user services start at boot (before login)
 sudo loginctl enable-linger "$USER"
 
-# Create uinput group if it doesn't exist
-if ! getent group uinput >/dev/null; then
-	sudo groupadd uinput
+# Create uinput as a system group. udev deprecates non-system groups owning
+# device nodes, so recreate it if an old non-system (GID >= 1000) one exists.
+uinput_gid="$(getent group uinput | cut -d: -f3)"
+if [ -z "$uinput_gid" ]; then
+	sudo groupadd -r uinput
+elif [ "$uinput_gid" -ge 1000 ]; then
+	sudo groupdel uinput
+	sudo groupadd -r uinput
 fi
 
 # Ensure user is in input and uinput groups for device access
