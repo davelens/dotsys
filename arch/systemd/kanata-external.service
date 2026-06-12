@@ -1,14 +1,22 @@
 [Unit]
 Description=Kanata keyboard remapper (external keyboards)
 Documentation=https://github.com/jtroo/kanata
+# Wait for input devices/seat to be ready before starting.
+After=multi-user.target
 
 [Service]
-# Lingering starts this at boot before input devices/seat are ready, causing
-# "No keyboard devices were found" until a device appears. Wait first.
+# Run as the regular user but force the uinput supplementary group so kanata
+# can open /dev/uinput. A system service is used (instead of a user service)
+# because the lingering user manager captures supplementary groups at boot and
+# never refreshes them, dropping the uinput group.
+User=davelens
+Group=davelens
+SupplementaryGroups=uinput input
+# System units do not expand %h, so the config path is explicit.
 ExecStartPre=/usr/bin/sleep 3
-ExecStart=/usr/bin/kanata --cfg %h/.config/kanata/external.kbd
+ExecStart=/usr/bin/kanata --cfg /home/davelens/.config/kanata/external.kbd
 Restart=on-failure
 RestartSec=3
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
