@@ -2,7 +2,9 @@
 set -e
 DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
-# Enable lingering so user services start at boot (before login)
+# Enable lingering so the other user-scope session services start at boot.
+# Kanata itself runs as a *system* service (see below), so it no longer
+# depends on lingering, but leaving this here is harmless and idempotent.
 sudo loginctl enable-linger "$USER"
 
 # Create uinput as a system group. udev deprecates non-system groups owning
@@ -24,19 +26,25 @@ echo 'KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinpu
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
 paru -S --needed --noconfirm kanata-bin
-systemctl --user daemon-reload
+
+# Kanata runs as system services so the uinput supplementary group is honoured
+# (a lingering user manager captures groups at boot and never refreshes them,
+# dropping uinput). Tear down any legacy user-scope units from the old setup.
+systemctl --user disable --now kanata.service kanata-external.service 2>/dev/null || true
+
+sudo systemctl daemon-reload
 
 # Only enable the internal keyboard service if a Framework keyboard is present.
-# On other machines, only the external/catch-all service is needed.
+# On other machines, only the external/named-keyboard service is needed.
 if ls /dev/input/by-id/*Framework* &>/dev/null; then
-	systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/kanata.service"
-	systemctl --user restart kanata
+	sudo systemctl enable "$DOTSYS_REPO_HOME/arch/systemd/kanata-internal.service"
+	sudo systemctl restart kanata-internal.service
 else
-	systemctl --user disable kanata.service 2>/dev/null || true
+	sudo systemctl disable --now kanata-internal.service 2>/dev/null || true
 fi
 
-systemctl --user enable "$DOTSYS_REPO_HOME/arch/systemd/kanata-external.service"
-systemctl --user restart kanata-external
+sudo systemctl enable "$DOTSYS_REPO_HOME/arch/systemd/kanata-external.service"
+sudo systemctl restart kanata-external.service
 
 # When you press capslock while Kanata is starting, you might end up with an
 # active capslock and no conventional way to turn it off.
