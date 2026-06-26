@@ -32,18 +32,26 @@ paru -S --needed --noconfirm kanata-bin
 # dropping uinput). Tear down any legacy user-scope units from the old setup.
 systemctl --user disable --now kanata.service kanata-external.service 2>/dev/null || true
 
+# Install the unit files as *real copies* in /etc, never as symlinks into the
+# repo. The repo lives under /home, which is a separate filesystem mounted
+# AFTER systemd reads system units at early boot. A symlinked unit therefore
+# fails to load ("Failed to open ...: No such file or directory") and kanata
+# silently never starts after a reboot.
+sudo install -m 0644 "$DOTSYS_REPO_HOME/arch/systemd/kanata-external.service" /etc/systemd/system/kanata-external.service
+sudo install -m 0644 "$DOTSYS_REPO_HOME/arch/systemd/kanata-internal.service" /etc/systemd/system/kanata-internal.service
+
 sudo systemctl daemon-reload
 
 # Only enable the internal keyboard service if a Framework keyboard is present.
 # On other machines, only the external/named-keyboard service is needed.
 if ls /dev/input/by-id/*Framework* &>/dev/null; then
-	sudo systemctl enable "$DOTSYS_REPO_HOME/arch/systemd/kanata-internal.service"
+	sudo systemctl enable kanata-internal.service
 	sudo systemctl restart kanata-internal.service
 else
 	sudo systemctl disable --now kanata-internal.service 2>/dev/null || true
 fi
 
-sudo systemctl enable "$DOTSYS_REPO_HOME/arch/systemd/kanata-external.service"
+sudo systemctl enable kanata-external.service
 sudo systemctl restart kanata-external.service
 
 # When you press capslock while Kanata is starting, you might end up with an
