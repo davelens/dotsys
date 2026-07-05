@@ -1,0 +1,7 @@
+#!/bin/sh
+# Turnstile-managed runit user service for waybar.
+# Started at login; sway isn't up yet at that point, so wait (via runsv's
+# restart loop) until sway publishes its env through turnstile-update-runit-env.
+exec 2>&1
+[ -r "$TURNSTILE_ENV_DIR/WAYLAND_DISPLAY" ] || { sleep 2; exit 1; }
+exec chpst -e "$TURNSTILE_ENV_DIR" waybar

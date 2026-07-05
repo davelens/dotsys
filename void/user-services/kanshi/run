@@ -1,0 +1,5 @@
+#!/bin/sh
+# Turnstile-managed runit user service for kanshi.
+exec 2>&1
+[ -r "$TURNSTILE_ENV_DIR/WAYLAND_DISPLAY" ] || { sleep 2; exit 1; }
+exec chpst -e "$TURNSTILE_ENV_DIR" kanshi

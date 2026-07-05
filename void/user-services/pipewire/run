@@ -1,0 +1,8 @@
+#!/bin/sh
+# Turnstile-managed runit user service for pipewire.
+# The conf.d drop-in makes this single process spawn wireplumber and the
+# pulse compatibility server too. Needs the session bus address, which the
+# dbus user service writes into the turnstile envdir.
+exec 2>&1
+[ -r "$TURNSTILE_ENV_DIR/DBUS_SESSION_BUS_ADDRESS" ] || { sleep 2; exit 1; }
+exec chpst -e "$TURNSTILE_ENV_DIR" pipewire
