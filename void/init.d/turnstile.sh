@@ -13,7 +13,8 @@ sudo ln -sf /etc/sv/acpid /var/service/
 sudo ln -sf /etc/sv/turnstiled /var/service/
 
 # Seat access for the desktop user.
-sudo usermod -aG _seatd "$USER"
+desktop_user="$(id -un)"
+sudo usermod -aG _seatd "$desktop_user"
 
 # Hook turnstile into greetd's login path so the user service tree starts
 # at login. greetd.sh must have run first (it installs /etc/pam.d/greetd).

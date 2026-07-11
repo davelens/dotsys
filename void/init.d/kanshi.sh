@@ -3,7 +3,6 @@ set -e
 DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
 echo "==> Installing kanshi..."
-
 sudo xbps-install -Sy kanshi
 
 # kanshi as a turnstile user service (replaces the systemd user unit).

@@ -15,12 +15,17 @@
 set -e
 DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+if [ "$(id -u)" -eq 0 ]; then
+  echo "error: run this script as your desktop user, without sudo" >&2
+  echo "individual system changes will ask for sudo when needed" >&2
+  exit 1
+fi
+
 "$DOTSYS_REPO_HOME/void/preflight.sh"
 "$DOTSYS_REPO_HOME/void/init.d/sway.sh"
 "$DOTSYS_REPO_HOME/void/init.d/greetd.sh"
 "$DOTSYS_REPO_HOME/void/init.d/turnstile.sh" # after greetd.sh (patches its PAM file)
 "$DOTSYS_REPO_HOME/void/init.d/pipewire.sh"
-"$DOTSYS_REPO_HOME/void/init.d/waybar.sh"
 "$DOTSYS_REPO_HOME/void/init.d/kanshi.sh"
 
 # Not ported from arch/ yet: wifi (iwd), bluetooth-autoconnect, kanata,

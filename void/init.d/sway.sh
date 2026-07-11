@@ -25,6 +25,7 @@ sudo xbps-install -Sy \
 sudo tee /usr/local/bin/sway-session >/dev/null <<'EOF'
 #!/bin/sh
 export XDG_CURRENT_DESKTOP=sway
+export LIBSEAT_BACKEND=seatd
 
 # Sway refuses to start on the proprietary NVIDIA driver without this flag.
 if lsmod | grep -q '^nvidia '; then
