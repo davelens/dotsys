@@ -7,7 +7,18 @@ echo "==> Preflight: updating system + enabling extra repos..."
 sudo xbps-install -Syu xbps
 sudo xbps-install -yu
 
-# Nonfree repo (intel-ucode, etc.) and flatpak, mirroring arch/preflight.sh.
-sudo xbps-install -Sy void-repo-nonfree flatpak
+# This personalized profile targets x86_64 glibc. Steam needs the nonfree
+# and both multilib repositories.
+if [[ "$(xbps-uhelper arch)" != "x86_64" ]]; then
+  echo "error: the dotsys Void profile requires x86_64 glibc" >&2
+  exit 1
+fi
+sudo xbps-install -Sy \
+  void-repo-nonfree \
+  void-repo-multilib \
+  void-repo-multilib-nonfree \
+  flatpak
+
+# Keep desktop applications user-scoped, like the Arch bootstrap.
 flatpak remote-add --user --if-not-exists flathub \
   https://dl.flathub.org/repo/flathub.flatpakrepo

@@ -1,0 +1,2 @@
+# User-scoped Flatpak applications
+com.discordapp.Discord              # Chat application

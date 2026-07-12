@@ -1,8 +1,15 @@
 # dotsys
 
-This repo contains my personalized bootstrap installers for setting up macos or Arch Linux for my (web)development work.
+This repo contains my personalized bootstrap installers for setting up macOS, Arch Linux, Void Linux, or WSL for my (web) development work.
 
 As such, they work in tandem with [my dotfiles](https://github.com/davelens/dotfiles). If you're looking for tool configurations, you should look in there instead.
+
+## Void Linux
+
+The minimal bootable system installation lives in [dotvoid](https://github.com/davelens/dotvoid). 
+After booting that system, run `void/init.sh` as the desktop user. It updates 
+the system, enables the required repositories, installs the package lists in 
+`void/packages/`, and configures the Sway session and its runit services.
 
 ## Local LLM setup
 

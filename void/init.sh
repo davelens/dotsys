@@ -22,12 +22,16 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 "$DOTSYS_REPO_HOME/void/preflight.sh"
+"$DOTSYS_REPO_HOME/void/packages/init.sh"
 "$DOTSYS_REPO_HOME/void/init.d/sway.sh"
 "$DOTSYS_REPO_HOME/void/init.d/greetd.sh"
 "$DOTSYS_REPO_HOME/void/init.d/turnstile.sh" # after greetd.sh (patches its PAM file)
 "$DOTSYS_REPO_HOME/void/init.d/pipewire.sh"
 "$DOTSYS_REPO_HOME/void/init.d/kanshi.sh"
 
+# Optional components, intentionally not installed by default:
+# "$DOTSYS_REPO_HOME/void/init.d/waybar.sh"
+#
 # Not ported from arch/ yet: wifi (iwd), bluetooth-autoconnect, kanata,
 # power-profiles, samba, databases. Port them here when needed.
 
