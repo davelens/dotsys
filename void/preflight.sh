@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
+echo
 echo "==> Preflight: updating system + enabling extra repos..."
 
 # Update xbps itself first, then the world.
