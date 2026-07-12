@@ -10,7 +10,6 @@ fastfetch                           # System info (but fast)
 inotify-tools                       # File change listener used by Ex/Phoenix
 inxi                                # System info (queryable)
 matugen                             # Material You color generator
-pgcli                               # Postgres CLI client with some QoL
 powertop                            # Power consumption monitor
 radeontop                           # AMD GPU sensor monitor
 seahorse                            # GUI SSH/GNUPG key manager
