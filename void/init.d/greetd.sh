@@ -27,9 +27,6 @@ if [ -e /var/service/agetty-tty1 ] || [ -L /var/service/agetty-tty1 ]; then
   sudo rm -f /var/service/agetty-tty1
 fi
 
-# runit: linking a service starts it within seconds. greetd claims VT1, so
-# don't run this from the VT1 console; ssh or another VT is fine.
-if [ ! -L /var/service/greetd ]; then
-  echo "==> Enabling greetd (takes over VT1 immediately!)"
-  sudo ln -s /etc/sv/greetd /var/service/
-fi
+# Do not enable greetd here: linking the service immediately takes over VT1
+# and can interrupt the bootstrap before turnstile configures the login session.
+# void/init.sh enables it only after all session infrastructure is ready.
