@@ -2,13 +2,11 @@
 bash-language-server    # LSP server for Bash
 btop                    # Resource monitor
 cliphist                # Clipboard manager for Sway+rofi
-curl                    # Network transfer tool
-imagemagick             # Image manipulation tools, v7+
+ImageMagick             # Image manipulation tools, v7+
 inetutils               # GNU network utilities
 less                    # Reads text files, one screen at a time
 mise                    # Development tool version manager
 neovim                  # Text editor
-python                  # Python runtime
 ripgrep                 # Fast recursive search
 tmux                    # Terminal multiplexer
 tree-sitter             # Parser generator and library
