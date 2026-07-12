@@ -29,8 +29,12 @@ fi
 "$DOTSYS_REPO_HOME/void/init.d/pipewire.sh"
 "$DOTSYS_REPO_HOME/void/init.d/kanshi.sh"
 
-# Enabling greetd takes over VT1 immediately, so it must be the final setup
-# step, after turnstile has installed its PAM hook and runtime-dir manager.
+# Switching VT1 from agetty to greetd terminates any shell running there, so
+# this must be the final setup step, after all session infrastructure is ready.
+if [ -e /var/service/agetty-tty1 ] || [ -L /var/service/agetty-tty1 ]; then
+  echo "==> Disabling agetty on VT1..."
+  sudo rm -f /var/service/agetty-tty1
+fi
 if [ ! -L /var/service/greetd ]; then
   echo "==> Enabling greetd (takes over VT1 immediately!)"
   sudo ln -s /etc/sv/greetd /var/service/

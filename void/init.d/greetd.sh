@@ -20,13 +20,6 @@ EOF
 sudo mkdir -p /var/cache/tuigreet
 sudo chown _greeter:_greeter /var/cache/tuigreet
 
-# greetd and agetty cannot both read from VT1. Void enables agetty-tty1 by
-# default, so remove it from the active runsvdir before starting greetd.
-if [ -e /var/service/agetty-tty1 ] || [ -L /var/service/agetty-tty1 ]; then
-  echo "==> Disabling agetty on VT1..."
-  sudo rm -f /var/service/agetty-tty1
-fi
-
-# Do not enable greetd here: linking the service immediately takes over VT1
-# and can interrupt the bootstrap before turnstile configures the login session.
-# void/init.sh enables it only after all session infrastructure is ready.
+# Do not disable agetty or enable greetd here: either action can terminate a
+# bootstrap running from VT1. void/init.sh switches VT1 only after all session
+# infrastructure is ready.

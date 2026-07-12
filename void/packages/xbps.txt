@@ -5,6 +5,7 @@ cliphist                # Clipboard manager for Sway+rofi
 ImageMagick             # Image manipulation tools, v7+
 inetutils               # GNU network utilities
 less                    # Reads text files, one screen at a time
+mesa-dri                # Mesa drivers, including software rendering for VMs
 mise                    # Development tool version manager
 neovim                  # Text editor
 ripgrep                 # Fast recursive search
