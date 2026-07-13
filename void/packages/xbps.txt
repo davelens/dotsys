@@ -2,12 +2,14 @@
 bash-language-server    # LSP server for Bash
 btop                    # Resource monitor
 cliphist                # Clipboard manager for Sway+rofi
+delta                   # Syntax-highlighting pager for git, diff, grep,...
 ImageMagick             # Image manipulation tools, v7+
 inetutils               # GNU network utilities
 less                    # Reads text files, one screen at a time
 mesa-dri                # Mesa drivers, including software rendering for VMs
 mise                    # Development tool version manager
 neovim                  # Text editor
+ncurses-term            # Provides `tmux-256color`
 ripgrep                 # Fast recursive search
 tmux                    # Terminal multiplexer
 tree-sitter             # Parser generator and library
