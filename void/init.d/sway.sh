@@ -20,8 +20,9 @@ sudo xbps-install -Sy \
   wev
 
 # Session wrapper launched by greetd (replaces `uwsm start default`).
-# The turnstile dbus user service provides the session bus, so sway must
-# NOT go through dbus-run-session (that would spawn a second bus).
+# The turnstile D-Bus user service provides the shared session bus, while
+# elogind supplies the login session and seat. Sway must not go through
+# dbus-run-session because that would spawn a second bus.
 sudo tee /usr/local/bin/sway-session >/dev/null <<'EOF'
 #!/bin/sh
 
@@ -32,8 +33,8 @@ if [ -r "$shared_env" ]; then
 fi
 
 export XDG_CURRENT_DESKTOP=sway
-export LIBSEAT_BACKEND=seatd
 
+# Let libseat select elogind's logind backend automatically.
 # Sway refuses to start on the proprietary NVIDIA driver without this flag.
 if lsmod | grep -q '^nvidia '; then
   exec sway --unsupported-gpu

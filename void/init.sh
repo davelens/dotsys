@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Void Linux bootstrap — sway desktop on runit.
 #
-# Architectural note: on Arch this repo uses uwsm + systemd user units.
-# Neither exists on Void (runit, no systemd), so the session stack is:
+# Architectural note: Void keeps system and user service supervision on runit,
+# while elogind supplies the desktop-facing logind interface:
 #
 #   uwsm start default   -> greetd runs `sway-session` wrapper directly
-#   logind (sessions)    -> turnstile (turnstiled + pam_turnstile)
-#   logind (seats)       -> seatd
+#   logind               -> elogind (sessions, seats, power, polkit identity)
 #   systemd user units   -> turnstile-managed runit services in ~/.config/service/
 #   session dbus         -> turnstile dbus user service (shared bus, /run/user/$UID/bus)
+#
+# Turnstile does not manage XDG_RUNTIME_DIR in this arrangement; elogind does.
 #
 # Run as the desktop user (needs sudo). Assumes a base install produced by
 # the davelens/void repo (NetworkManager, dbus already enabled).

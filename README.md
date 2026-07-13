@@ -7,9 +7,11 @@ As such, they work in tandem with [my dotfiles](https://github.com/davelens/dotf
 ## Void Linux
 
 The minimal bootable system installation lives in [dotvoid](https://github.com/davelens/dotvoid). 
-After booting that system, run `void/init.sh` as the desktop user. It updates 
-the system, enables the required repositories, installs the package lists in 
-`void/packages/`, and configures the Sway session and its runit services.
+After booting that system, run `void/init.sh` as the desktop user. It updates
+the system, enables the required repositories, installs the package lists in
+`void/packages/`, and configures Sway with elogind-backed desktop sessions and
+turnstile-managed user runit services. Services that need graphical-session
+identity are launched by Sway while runit supervises their process lifetime.
 
 ## Local LLM setup
 

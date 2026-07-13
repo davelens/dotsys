@@ -1,0 +1,52 @@
+#!/bin/sh
+# Turnstile supervises this service, but polkit requires the agent itself to
+# belong to the active graphical login session. Ask Sway to launch it, then
+# keep the runit service alive for exactly as long as that process exists.
+exec 2>&1
+
+[ -n "${TURNSTILE_ENV_DIR:-}" ] || { sleep 2; exit 1; }
+for name in DBUS_SESSION_BUS_ADDRESS WAYLAND_DISPLAY SWAYSOCK; do
+  [ -r "$TURNSTILE_ENV_DIR/$name" ] || { sleep 2; exit 1; }
+done
+
+runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+pidfile="$runtime_dir/dotsys-lxqt-policykit.pid"
+launcher="$runtime_dir/dotsys-lxqt-policykit-launch"
+pid=""
+
+cleanup() {
+  if [ -n "$pid" ]; then
+    kill "$pid" 2>/dev/null || true
+  fi
+  rm -f "$pidfile" "$launcher"
+}
+trap 'cleanup; exit 0' HUP INT TERM
+trap cleanup EXIT
+
+if [ -r "$pidfile" ]; then
+  old_pid=$(cat "$pidfile")
+  kill "$old_pid" 2>/dev/null || true
+fi
+rm -f "$pidfile"
+
+cat >"$launcher" <<EOF
+#!/bin/sh
+umask 077
+echo \$\$ >"$pidfile"
+exec /usr/bin/lxqt-policykit-agent
+EOF
+chmod 700 "$launcher"
+
+chpst -e "$TURNSTILE_ENV_DIR" swaymsg exec "$launcher" >/dev/null
+
+attempt=0
+while [ ! -r "$pidfile" ] && [ "$attempt" -lt 50 ]; do
+  attempt=$((attempt + 1))
+  sleep 0.1
+done
+[ -r "$pidfile" ] || exit 1
+pid=$(cat "$pidfile")
+
+while kill -0 "$pid" 2>/dev/null; do
+  sleep 1
+done
