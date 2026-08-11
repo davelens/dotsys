@@ -13,6 +13,8 @@ if [[ ! -d "/usr/lib/modules/$running_kernel" ]]; then
   exit 1
 fi
 
+sudo pacman -S --needed --noconfirm docker docker-compose
+
 for service in docker tailscaled; do
   if ! systemctl cat "$service.service" >/dev/null 2>&1; then
     echo "$service.service is not installed." >&2
