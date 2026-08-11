@@ -1,0 +1,19 @@
+services:
+  ntfy:
+    image: binwiederhier/ntfy:v2.27.0
+    container_name: ntfy
+    command: serve
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.5
+    ports:
+      - "127.0.0.1:2586:80"
+    environment:
+      NTFY_BASE_URL: "${NTFY_BASE_URL:?Set NTFY_BASE_URL}"
+      NTFY_CACHE_FILE: /var/cache/ntfy/cache.db
+      NTFY_UPSTREAM_BASE_URL: https://ntfy.sh
+    volumes:
+      - ntfy-cache:/var/cache/ntfy
+
+volumes:
+  ntfy-cache:

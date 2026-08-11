@@ -13,6 +13,10 @@ the system, enables the required repositories, installs the package lists in
 turnstile-managed user runit services. Services that need graphical-session
 identity are launched by Sway while runit supervises their process lifetime.
 
+## ntfy
+
+Run `arch/init.d/ntfy.sh` to start the Dockerized ntfy server and publish it through Tailscale Serve. The container setup lives in `shared/ntfy/`; only the service-manager adapter is Arch-specific so a Void/runit adapter can reuse it later.
+
 ## Local LLM setup
 
 Arch local LLM provisioning lives in `arch/init.d/llama-cpp.sh`.
