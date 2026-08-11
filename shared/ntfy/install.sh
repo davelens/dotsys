@@ -36,7 +36,7 @@ elif [[ -f "$URL_FILE" ]]; then
   topic="$(<"$URL_FILE")"
   topic="${topic##*/}"
 else
-  topic="pi-$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')"
+  topic="$(uname -n)"
 fi
 
 if [[ ! "$topic" =~ ^[-_A-Za-z0-9]{1,64}$ ]]; then
