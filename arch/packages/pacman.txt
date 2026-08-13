@@ -1,7 +1,6 @@
 # Arch-specific system packages
 asciinema                           # Terminal session recorder
 cava                                # Audio visualizer
-cliphist                            # Clipboard manager for Sway+rofi
 cmatrix                             # Nostalgia amplification tool
 cpupower                            # CPU frequency/governor tool
 duf                                 # Disk usage monitor

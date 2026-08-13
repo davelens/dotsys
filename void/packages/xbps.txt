@@ -14,6 +14,7 @@ ripgrep                 # Fast recursive search
 tmux                    # Terminal multiplexer
 tree-sitter             # Parser generator and library
 tree-sitter-cli         # Interact with tree-sitter through CLI
+wl-clip-persist         # Make the Wayland clipboard persist when apps quit
 
 # Native Steam requires the nonfree and multilib repositories enabled by
 # void/preflight.sh. This Void profile targets x86_64 glibc.
