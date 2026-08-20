@@ -3,6 +3,7 @@ set -e
 DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 "$DOTSYS_REPO_HOME/arch/preflight.sh"
+"$DOTSYS_REPO_HOME/arch/init.d/amdgpu-brightness.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/wifi.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/bluetooth.sh"
 "$DOTSYS_REPO_HOME/arch/init.d/sway.sh"
