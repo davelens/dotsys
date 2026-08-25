@@ -41,6 +41,7 @@
     "gnutls",
     "gpgme",
     "grub",
+    "inetutils",
     "iwd",
     "jq",
     "keychain",
