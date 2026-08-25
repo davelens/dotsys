@@ -15,17 +15,16 @@ FOLDER_ID="pi-sessions"
 FOLDER_PATH="$HOME/.config/pi/sessions"
 FOLDER_LABEL="Pi Sessions"
 
+echo "==> Installing syncthing + hostname..."
+sudo pacman -S --needed --noconfirm syncthing inetutils
+
 case "$(hostname)" in
   framework-laptop)  DEFAULT_PEER="framework-desktop" ;;
   framework-desktop) DEFAULT_PEER="framework-laptop" ;;
+  desktop)           DEFAULT_PEER="framework-desktop" ;;
   *) DEFAULT_PEER="" ;;
 esac
 PEER_SSH="${PEER_SSH:-$DEFAULT_PEER}"
-
-echo "==> Installing syncthing..."
-if ! command -v syncthing >/dev/null; then
-  sudo pacman -S --needed --noconfirm syncthing
-fi
 
 echo "==> Enabling user service..."
 systemctl --user enable --now syncthing.service
