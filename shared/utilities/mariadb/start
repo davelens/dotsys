@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../helper-env.sh"
+[[ $# == 0 ]] || helper_fail 'Usage: mariadb start (no arguments)'
+case "$DOTSYS_PLATFORM" in
+  arch|wsl) helper_need systemctl; exec systemctl start mariadb ;;
+  void)
+    helper_need sv
+    # No Void database provisioner exists here; require the prepared service path.
+    [[ ${DOTSYS_MARIADB_SERVICE:-} == /* && -x ${DOTSYS_MARIADB_SERVICE:-}/run ]] || helper_fail 'Set DOTSYS_MARIADB_SERVICE to the absolute prepared MariaDB runit service directory (with executable run).'
+    exec sv up "$DOTSYS_MARIADB_SERVICE"
+    ;;
+  macos) helper_need mysql.server; exec mysql.server start ;;
+esac

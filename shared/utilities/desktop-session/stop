@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../helper-env.sh"
+[[ $# == 0 ]] || helper_fail 'Usage: desktop-session stop (no arguments)'
+case "$DOTSYS_PLATFORM" in
+  arch|wsl) helper_need uwsm; exec uwsm stop ;;
+  void) helper_need swaymsg; exec swaymsg exit ;;
+  *) helper_fail 'desktop-session stop requires Arch/uwsm or Void/Sway; use power control logout for macOS.' ;;
+esac

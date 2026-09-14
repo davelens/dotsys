@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../helper-env.sh"
+[[ $# -gt 0 ]] || helper_fail 'Usage: desktop-session launch COMMAND [ARG ...]'
+helper_need "$1"
+case "$DOTSYS_PLATFORM" in
+  arch|wsl) helper_need uwsm; exec uwsm app -- "$@" ;;
+  void|macos) exec "$@" ;;
+esac

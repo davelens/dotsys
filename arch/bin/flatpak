@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
+DOTSYS_REPO_HOME="$(dirname "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")")"
 source "$DOTSYS_REPO_HOME/arch/helpers.sh"
 
 UPDATE=false

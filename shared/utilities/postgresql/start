@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../helper-env.sh"
+[[ $# == 0 ]] || helper_fail 'Usage: postgresql start|stop (no arguments); set PGDATA explicitly if needed.'
+action=${0##*/}
+case "$action" in start|stop) ;; *) helper_fail 'Invoke postgresql/start or postgresql/stop.' ;; esac
+helper_need pg_ctl
+
+if [[ ${PGDATA+x} ]]; then
+  [[ $PGDATA == /* && -f $PGDATA/PG_VERSION ]] || helper_fail 'PGDATA must name an absolute existing PostgreSQL cluster (PG_VERSION required).'
+else
+  # Only known provisioner/mise locations, including legacy default XDG roots.
+  # Never ask mise to activate/install, or initialize/move a cluster here.
+  candidates=("$XDG_DATA_HOME/postgres/data" "$HOME/.local/share/postgres/data")
+  shopt -s nullglob
+  for base in "${MISE_DATA_DIR:-$XDG_DATA_HOME/mise}" "$HOME/.local/share/mise"; do
+    [[ $base == /* ]] || helper_fail 'MISE_DATA_DIR must be absolute.'
+    candidates+=("$base"/installs/postgres/*/data)
+  done
+  clusters=()
+  for candidate in "${candidates[@]}"; do
+    [[ -f $candidate/PG_VERSION ]] || continue
+    candidate=$(realpath "$candidate")
+    duplicate=false
+    for cluster in "${clusters[@]}"; do
+      [[ $cluster != "$candidate" ]] || duplicate=true
+    done
+    [[ $duplicate == true ]] || clusters+=("$candidate")
+  done
+  [[ ${#clusters[@]} == 1 ]] || helper_fail 'No unambiguous existing PostgreSQL cluster; set PGDATA explicitly. Runtime helpers never initialize databases.'
+  PGDATA=${clusters[0]}
+fi
+exec pg_ctl -D "$PGDATA" "$action"

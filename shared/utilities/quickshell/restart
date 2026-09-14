@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../helper-env.sh"
+[[ $# == 0 ]] || helper_fail 'Usage: quickshell restart (no arguments)'
+case "$DOTSYS_PLATFORM" in
+  arch|wsl) helper_need systemctl; exec systemctl --user restart quickshell.service ;;
+  void)
+    helper_need sv
+    service="$XDG_CONFIG_HOME/service/quickshell"
+    [[ -x $service/run ]] || helper_fail "Missing prepared turnstile service: $service; prepare it with dotsys."
+    exec sv restart "$service"
+    ;;
+  *) helper_fail 'quickshell restart requires Arch/systemd or Void/turnstile.' ;;
+esac

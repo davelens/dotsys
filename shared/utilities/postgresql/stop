@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Share cluster selection with start; the invoked basename supplies the action.
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/start"

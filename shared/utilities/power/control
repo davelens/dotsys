@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../helper-env.sh"
+[[ $# == 1 ]] || helper_fail 'Usage: power control poweroff|shutdown|reboot|suspend|hibernate|lock|logout'
+action=$1
+[[ $action != shutdown ]] || action=poweroff
+case "$action" in poweroff|reboot|suspend|hibernate|lock|logout) ;; *) helper_fail 'Unknown power operation.' ;; esac
+case "$DOTSYS_PLATFORM" in
+  arch|wsl|void)
+    case "$action" in
+      lock) helper_need loginctl; exec loginctl lock-session ;;
+      logout)
+        [[ -n ${XDG_SESSION_ID:-} && $XDG_SESSION_ID != -* ]] || helper_fail 'Set XDG_SESSION_ID to the current login session before logout.'
+        helper_need loginctl
+        exec loginctl terminate-session "$XDG_SESSION_ID"
+        ;;
+    esac
+    if [[ $DOTSYS_PLATFORM == void ]]; then
+      helper_need loginctl
+      exec loginctl "$action"
+    fi
+    helper_need systemctl
+    exec systemctl "$action"
+    ;;
+  macos)
+    case "$action" in
+      poweroff) operation='shut down' ;;
+      reboot) operation=restart ;;
+      suspend) operation=sleep ;;
+      logout) operation='log out' ;;
+      *) helper_fail "power control $action is unsupported on macOS." ;;
+    esac
+    helper_need osascript
+    exec osascript -e "tell application \"System Events\" to $operation"
+    ;;
+esac

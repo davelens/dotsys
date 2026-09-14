@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../../helper-env.sh"
+[[ $# == 0 ]] || helper_fail 'Usage: desktop-session finalize (no arguments)'
+case "$DOTSYS_PLATFORM" in
+  arch|wsl)
+    helper_need uwsm systemctl
+    uwsm finalize
+    exec systemctl --user restart xdg-desktop-portal.service
+    ;;
+  void)
+    helper_need turnstile-update-runit-env dbus-update-activation-environment
+    session_variables=(DISPLAY I3SOCK SWAYSOCK WAYLAND_DISPLAY XCURSOR_SIZE XCURSOR_THEME XDG_CURRENT_DESKTOP)
+    turnstile-update-runit-env "${session_variables[@]}"
+    exec dbus-update-activation-environment "${session_variables[@]}"
+    ;;
+  *) helper_fail 'desktop-session finalize requires Arch/uwsm or Void/turnstile.' ;;
+esac

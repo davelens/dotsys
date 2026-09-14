@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+root=$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")
+source "$root/shared/helper-env.sh"
+helper_need python3
+exec python3 -I -B - "$root" "$@" <<'PY'
+import argparse
+import os
+from pathlib import Path
+import sys
+
+root = Path(sys.argv.pop(1))
+parser = argparse.ArgumentParser(prog='register-helpers', description='Register the complete dotsys utility-category plan using dotfiles ownership. No services are started. Use stable checkouts, never scratch targets in real HOME.')
+parser.add_argument('action', choices=('check', 'apply', 'remove', 'restore'))
+parser.add_argument('--dotfiles-root', required=True, help='Absolute configured dotfiles checkout; supplies setup/managed.py and bin/utilities')
+parser.add_argument('--state-root', default=os.environ['XDG_STATE_HOME'] + '/dotsys')
+parser.add_argument('--adopt', action='append', default=[], metavar='PATH')
+parser.add_argument('--replace', action='append', default=[], metavar='PATH')
+parser.add_argument('--path', action='append', help='Remove only this exact category destination (repeatable)')
+parser.add_argument('--backup', help='Exact recorded backup ID for restore')
+args = parser.parse_args()
+if ((args.action == 'restore') != bool(args.backup)
+        or (args.adopt and args.action not in ('check', 'apply'))
+        or (args.replace and args.action == 'remove')
+        or (args.path is not None and args.action != 'remove')):
+    parser.error('--adopt is for check/apply; --replace for check/apply/restore; --path for remove; --backup is required only for restore.')
+
+# Import only the explicitly supplied public engine, never shell configuration.
+checkout = Path(args.dotfiles_root)
+if (not checkout.is_absolute() or os.path.normpath(args.dotfiles_root) != args.dotfiles_root
+        or not (checkout/'setup/managed.py').is_file()):
+    parser.error('--dotfiles-root must supply setup/managed.py; prepare the dotfiles checkout first.')
+sys.path.insert(0, str(checkout/'setup'))
+try:
+    import managed
+    categories = {
+        'postgresql': ('start', 'stop'),
+        'mariadb': ('start', 'stop'),
+        'desktop-session': ('launch', 'stop', 'finalize'),
+        'kanshi': ('restart',),
+        'quickshell': ('restart',),
+        'power': ('control',),
+    }
+    destinations = checkout/'bin/utilities'
+    if args.path and set(args.path) - {str(destinations/name) for name in (*categories, 'arch')}:
+        parser.error('--path must name an exact dotsys category under this checkout/bin/utilities.')
+    if args.action in ('check', 'apply'):
+        if not destinations.is_dir():
+            parser.error('Missing bin/utilities; configure the dotfiles checkout before helper registration.')
+        plan = []
+        for category, commands in categories.items():
+            source = root/'shared/utilities'/category
+            for command in commands:
+                if not (source/command).is_file() or not os.access(source/command, os.X_OK):
+                    parser.error('Missing executable helper: ' + str(source/command))
+            plan.append(dict(kind='link', destination=str(destinations/category), target=str(source)))
+        if os.environ['DOTSYS_PLATFORM'] in ('arch', 'wsl'):
+            source = root/'arch/bin'
+            for command in ('bundle', 'flatpak', 'gpu-check', 'mariadb', 'nas', 'pacman', 'paru'):
+                if not (source/command).is_file() or not os.access(source/command, os.X_OK):
+                    parser.error('Missing executable Arch helper: ' + str(source/command))
+            plan.append(dict(kind='link', destination=str(destinations/'arch'), target=str(source)))
+        # apply removes omitted unchanged owned artifacts: never pass a partial plan.
+        getattr(managed, args.action)(plan, 'dotsys', args.state_root, args.adopt, args.replace)
+    elif args.action == 'remove':
+        managed.remove('dotsys', args.state_root, args.path)
+    else:
+        managed.restore('dotsys', args.state_root, args.backup, args.replace)
+except (OSError, ValueError, TypeError, ImportError):
+    print('dotsys: registration failed; artifacts/backups preserved. Check the ownership engine, pinned Dotbot, and private state at ' + args.state_root, file=sys.stderr)
+    sys.exit(1)
+except managed.Conflict as error:
+    print('dotsys: ' + str(error), file=sys.stderr)
+    sys.exit(1)
+PY

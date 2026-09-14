@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+DOTSYS_REPO_HOME="$(dirname "$(dirname "$(dirname "$(realpath "${BASH_SOURCE[0]}")")")")"
 
 # This commmand is a convenience wrapper around the Arch packages init script.
 
