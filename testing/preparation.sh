@@ -34,7 +34,7 @@ script(commands/'mise', '''[[ $MISE_NO_CONFIG == 1 && $MISE_NO_ENV == 1 && $MISE
 printf '%s\\n' "$*" >> "$EVENTS"
 case "$1 $2" in
 'config get') [[ $3 == tools && $4 == --file && $5 == "$CANDIDATE_CONFIG" ]] || exit 99
-  if [[ ${DECLARATIONS+x} ]]; then printf '%s\\n' "$DECLARATIONS"; else printf 'nodejs = "26.7.0"\\n'; fi;;
+  if [[ ${DECLARATIONS+x} ]]; then printf '%s\\n' "$DECLARATIONS"; else printf 'nodejs = "26.7.0"\\npostgres = "18.6"\\n'; fi;;
 'install --yes') [[ ${FAIL_INSTALL:-} != yes ]] || exit 71;;
 *) exit 99;; esac''')
 base = {k:v for k,v in os.environ.items() if k == 'HOME' or k.startswith('XDG_') or k == 'TMPDIR'}
@@ -116,7 +116,7 @@ active, candidate = sandbox/'active', sandbox/'candidate'
 for repo in (active, candidate):
     repo.mkdir(); git_run('init','-q',repo)
     (repo/'config/mise').mkdir(parents=True)
-    (repo/'config/mise/config.toml').write_text('[tools]\nnodejs = "26.7.0"\n[hooks]\nenter = "exit 99"\n')
+    (repo/'config/mise/config.toml').write_text('[tools]\nnodejs = "26.7.0"\npostgres = "18.6"\n[hooks]\nenter = "exit 99"\n')
     git_run('-C',repo,'add','.'); git_run('-C',repo,'commit','-qm','fixture')
 config = Path(base['XDG_CONFIG_HOME'])
 (config/'mise').symlink_to(active/'config/mise')
@@ -125,8 +125,8 @@ base['CANDIDATE_CONFIG'] = str(candidate/'config/mise/config.toml')
 before = {p:snapshot(p) for p in (active,candidate,config)}
 revisions = [git_run('-C',p,'rev-parse','HEAD') for p in (active,candidate)]
 run(root/'shared/mise/init.sh', '--config', base['CANDIDATE_CONFIG'])
-assert events.read_text().splitlines() == ['config get tools --file '+base['CANDIDATE_CONFIG'], 'install --yes nodejs@26.7.0']
-for value in ('nodejs = "prefix:26"', 'nodejs = ["26.7.0"]', 'nodejs = "$(touch forbidden)"'):
+assert events.read_text().splitlines() == ['config get tools --file '+base['CANDIDATE_CONFIG'], 'install --yes nodejs@26.7.0 postgres@18.6']
+for value in ('nodejs = "prefix:26"', 'nodejs = "26"', 'nodejs = "26.7.0.1"', 'nodejs = ["26.7.0"]', 'nodejs = "$(touch forbidden)"'):
     events.unlink()
     run(root/'shared/mise/init.sh','--config',base['CANDIDATE_CONFIG'],env=dict(base,DECLARATIONS=value),failure=True)
     assert len(events.read_text().splitlines()) == 1

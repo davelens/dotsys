@@ -20,7 +20,7 @@ import re, sys
 lines = [v for v in sys.stdin.read().splitlines() if v.strip()]
 if not lines: sys.exit("No declared mise tools")
 for line in lines:
-    m = re.fullmatch(r"([a-zA-Z0-9_-]+) = \"(latest|[0-9]+(?:\.[0-9]+){2})\"", line)
+    m = re.fullmatch(r"([a-zA-Z0-9_-]+) = \"(latest|[0-9]+(?:\.[0-9]+){1,2})\"", line)
     if not m: sys.exit("Unsupported mise declaration; expected string pins/latest")
     print(m[1] + "@" + m[2])
 ' <<< "$declarations")
