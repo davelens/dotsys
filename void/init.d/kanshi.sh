@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-set -e
-DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
-
-echo "==> Installing kanshi..."
-sudo xbps-install -Sy kanshi
-
-# kanshi as a turnstile user service (replaces the systemd user unit).
-mkdir -p "$HOME/.config/service/kanshi"
-ln -sf "$DOTSYS_REPO_HOME/void/user-services/kanshi/run" \
-  "$HOME/.config/service/kanshi/run"
-
-echo "==> kanshi installation complete!"
+set -euo pipefail
+DOTSYS_REPO_HOME=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
+source "$DOTSYS_REPO_HOME/arch/helpers.sh"
+service_context "${1:---all}"
+if [[ $phase == --all || $phase == --packages ]]; then sudo xbps-install -Sy kanshi; fi
+if [[ $phase == --all || $phase == --prepare ]]; then
+  service_file "$prepared/kanshi/run" 755 <"$DOTSYS_REPO_HOME/void/user-services/kanshi/run"
+fi
+if [[ $phase == --all || $phase == --activate ]]; then
+  service_link "$prepared/kanshi" "$XDG_CONFIG_HOME/service/kanshi"
+fi

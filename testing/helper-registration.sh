@@ -44,9 +44,10 @@ def fixture(name):
     return checkout, destination, state
 
 
-def run(checkout, state, action, *args, failure=False, platform='arch', script=None, default_state=False):
+def run(checkout, state, action, *args, failure=False, platform='arch', script=None, default_state=False, changes=None):
     global checks
     local = dict(env, DOTSYS_PLATFORM=platform)
+    if changes: local.update(changes)
     command = [str(script or root/'shared/register-helpers'), action, '--dotfiles-root', str(checkout)]
     if not default_state:
         command += ['--state-root', str(state)]
@@ -211,6 +212,83 @@ assert snapshot(checkout) == before and not state.exists()
 shutil.rmtree(dest)
 run(checkout, state, 'apply', failure=True)
 assert not dest.exists() and not state.exists()
+
+# Apps and categories coexist in ONE complete owner plan. Later helper-only
+# calls, platform changes and removal never imply software uninstall.
+checkout, dest, state = fixture('apps')
+apps = sandbox/'apps'
+software = apps/'software'
+dotvim, dotshell = software/'dotvim', software/'dotshell'
+dotvim.mkdir(parents=True); (dotvim/'init.lua').write_text('-- public fixture')
+(dotshell/'bin').mkdir(parents=True)
+(dotshell/'shell.qml').write_text('// public fixture')
+(dotshell/'bin/dshell').write_text('#!/usr/bin/env bash\nprintf "dshell %s\\n" "$*"\n')
+(dotshell/'bin/dshell').chmod(0o755)
+local = dict(XDG_CONFIG_HOME=str(apps/'config'), XDG_BIN_HOME=str(apps/'bin-home'))
+config, bins = Path(local['XDG_CONFIG_HOME']), Path(local['XDG_BIN_HOME'])
+args = ('--dotvim-root', dotvim, '--dotshell-root', dotshell)
+run(checkout, state, 'check', *args, changes=local)
+assert not config.exists() and not bins.exists()
+run(checkout, state, 'apply', *args, changes=local)
+for path, target in ((config/'dvim', dotvim), (config/'dotshell', dotshell),
+                     (bins/'dvim', root/'shared/repositories.sh'), (bins/'dshell', dotshell/'bin/dshell')):
+    assert os.readlink(path) == str(target)
+assert all((dest/c).is_symlink() for c in categories)
+assert set(ledger(state)['artifacts']) >= {str(config/'dvim'), str(bins/'dvim'), str(dest/'power')}
+before, saved = snapshot(apps), (state/'managed.json').read_bytes()
+run(checkout, state, 'apply', *args, changes=local)
+assert snapshot(apps) == before and (state/'managed.json').read_bytes() == saved
+run(checkout, state, 'apply', changes=local, platform='void')
+assert all((dest/c).is_symlink() for c in categories) and not (dest/'arch').exists()
+assert os.readlink(bins/'dshell') == str(dotshell/'bin/dshell')
+run(checkout, state, 'apply', '--void-autotiling', changes=local, platform='void')
+assert os.readlink(bins/'autotiling-rs') == str(root/'shared/repositories.sh')
+run(checkout, state, 'apply', changes=local, platform='void')
+assert (bins/'autotiling-rs').is_symlink()
+# Real installed wrappers preserve argv, including spaces, without legacy setup.
+for command in ('nvim','autotiling'):
+    p = bin/command
+    p.write_text('#!/usr/bin/env bash\nprintf "%s\\n" "${NVIM_APPNAME:-}" "$@"\n'); p.chmod(0o755)
+result = subprocess.run([str(bins/'dvim'),'a file','--literal'],env=dict(env,**local),capture_output=True,check=True)
+assert result.stdout.decode().splitlines() == ['dvim','-u',str(config/'dvim/init.lua'),'a file','--literal']
+result = subprocess.run([str(bins/'autotiling-rs'),'--workspace','a b'],env=dict(env,**local),capture_output=True,check=True)
+assert result.stdout.decode().splitlines() == ['', '--workspace','a b']
+# Modified software is preserved on helper-only calls; explicitly requesting
+# the app again detects the conflict instead of silently restoring its link.
+p = bins/'dshell'; p.unlink(); p.write_text('private software')
+run(checkout, state, 'apply', changes=local, platform='void')
+run(checkout, state, 'apply', *args, changes=local, failure=True)
+assert p.read_text() == 'private software'
+run(checkout, state, 'apply', *args, '--replace', p, changes=local)
+assert os.readlink(p) == str(dotshell/'bin/dshell')
+run(checkout, state, 'remove', changes=local)
+assert (bins/'dvim').is_symlink() and (config/'dotshell').is_symlink()
+assert all(not os.path.lexists(dest/c) for c in categories)
+
+# App conflicts are preflighted before category registration or directory writes.
+for kind in ('matching', 'file', 'directory', 'broken-link'):
+    checkout, dest, state = fixture('app-conflict-'+kind)
+    base = checkout.parent
+    local = dict(XDG_CONFIG_HOME=str(base/'config'), XDG_BIN_HOME=str(base/'bin-home'))
+    config = Path(local['XDG_CONFIG_HOME']); config.mkdir()
+    p = config/'dvim'
+    if kind == 'matching': p.symlink_to(dotvim)
+    elif kind == 'file': p.write_text('private software')
+    elif kind == 'directory': p.mkdir(); (p/'keep').write_text('private software')
+    else: p.symlink_to(base/'absent')
+    before = snapshot(base)
+    run(checkout, state, 'apply', '--dotvim-root', dotvim, changes=local, failure=True)
+    assert snapshot(base) == before and not state.exists()
+    if kind == 'matching':
+        identity = p.lstat()
+        run(checkout, state, 'apply', '--dotvim-root', dotvim, '--adopt', p, changes=local)
+        assert p.lstat() == identity
+    else:
+        run(checkout, state, 'apply', '--dotvim-root', dotvim, '--adopt', p, changes=local, failure=True)
+        assert snapshot(base) == before
+run(checkout, state, 'apply', '--dotvim-root', 'relative', failure=True)
+run(checkout, state, 'apply', '--dotshell-root', software/'missing', failure=True)
+run(checkout, state, 'apply', '--void-autotiling', failure=True)
 
 checkout, dest, state = fixture('default-state')
 state = Path(env['XDG_STATE_HOME'])/'dotsys'

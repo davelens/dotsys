@@ -4,9 +4,15 @@ set -e
 install_paru() {
   command -v paru &>/dev/null && return
   sudo pacman -S --needed --noconfirm base-devel git
-  git clone https://aur.archlinux.org/paru.git /tmp/paru
-  (cd /tmp/paru && makepkg -si --noconfirm)
-  rm -rf /tmp/paru
+  local source="${XDG_CACHE_HOME:-$HOME/.cache}/dotsys/paru"
+  mkdir -p "${source%/*}"
+  if [[ -e $source || -L $source ]]; then
+    echo 'Existing paru build directory preserved; review/remove it explicitly before retrying.' >&2
+    return 1
+  fi
+  git clone https://aur.archlinux.org/paru.git "$source"
+  (cd "$source" && makepkg -si --noconfirm)
+  # Retain the reviewed build source; never delete an unrelated destination.
 }
 
 install_flatpak() {
@@ -23,4 +29,4 @@ main() {
   install_flatpak
 }
 
-main "$@"
+if [[ ${1:-} == --aur ]]; then install_paru; else main "$@"; fi

@@ -31,5 +31,6 @@ cask "tailscale-app"                  # Free VPN service for my home server
 cask "thunderbird"                    # Mozilla's e-mail client
 cask "tonisives/tap/ovim"             # System-wide vim mode for any input
 cask "vlc"                            # The MVP open source media player
-cask "wezterm"                        # Terminal emulator and multiplexer
+cask "ghostty"                        # Native primary terminal
+cask "wezterm"                        # Retained optional terminal
 cask "whatsapp"                       # Because my family keeps using it

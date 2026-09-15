@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-set -e
-
-echo "==> Configuring GnuPG..."
-
-# Ensure correct permissions on GNUPGHOME (created by dotbot).
+set -euo pipefail
+# Configuration owns this directory. Do not start an agent or import identities.
+[[ ${GNUPGHOME:-} == /* && -d $GNUPGHOME && ! -L $GNUPGHOME ]] || {
+  echo 'dotsys: GNUPGHOME must already be a configured directory; install dotfiles first.' >&2
+  exit 1
+}
 chmod 700 "$GNUPGHOME"
-
-# Creates the keyring on first run (batch mode to avoid prompts).
-gpg --batch --list-keys >/dev/null 2>&1 || true
+gpg --batch --no-autostart --homedir "$GNUPGHOME" --list-keys >/dev/null

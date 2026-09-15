@@ -2,6 +2,16 @@
 set -e
 DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
+case ${1:-} in
+  --bootstrap)
+    sudo xbps-install -Sy bash python3 git coreutils sed tmux mise neovim delta gnupg base-devel curl tar unzip
+    exit ;;
+  --selected)
+    [[ $# == 2 ]] || exit 1
+    if [[ ,$2, == *,sway,* ]]; then "$DOTSYS_REPO_HOME/void/init.d/sway.sh" --packages; fi
+    exit ;;
+esac
+
 read_packages() {
   awk '!/^[[:space:]]*#/ && NF { print $1 }' "$1"
 }

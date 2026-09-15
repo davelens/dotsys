@@ -2,6 +2,20 @@
 set -e
 DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")"/../.. && pwd)"
 
+# The portability baseline is deliberately separate from the personal wishlist.
+case ${1:-} in
+  --bootstrap)
+    sudo pacman -S --needed --noconfirm bash python git coreutils sed tmux mise neovim git-delta gnupg base-devel curl tar unzip
+    exit ;;
+  --selected)
+    [[ $# == 2 ]] || exit 1
+    if [[ ,$2, == *,sway,* ]]; then
+      "$DOTSYS_REPO_HOME/arch/preflight.sh" --aur
+      "$DOTSYS_REPO_HOME/arch/init.d/sway.sh" --packages
+    fi
+    exit ;;
+esac
+
 usage() {
 	echo "Usage: $(basename "$0") [OPTIONS]"
 	echo

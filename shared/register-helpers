@@ -14,6 +14,9 @@ parser = argparse.ArgumentParser(prog='register-helpers', description='Register 
 parser.add_argument('action', choices=('check', 'apply', 'remove', 'restore'))
 parser.add_argument('--dotfiles-root', required=True, help='Absolute configured dotfiles checkout; supplies setup/managed.py and bin/utilities')
 parser.add_argument('--state-root', default=os.environ['XDG_STATE_HOME'] + '/dotsys')
+parser.add_argument('--dotvim-root', help='Absolute public dotvim checkout; retain software on later helper-only runs')
+parser.add_argument('--dotshell-root', help='Absolute public dotshell checkout; retain software on deselection')
+parser.add_argument('--void-autotiling', action='store_true', help='Register Void autotiling under the selected config command name')
 parser.add_argument('--adopt', action='append', default=[], metavar='PATH')
 parser.add_argument('--replace', action='append', default=[], metavar='PATH')
 parser.add_argument('--path', action='append', help='Remove only this exact category destination (repeatable)')
@@ -60,7 +63,38 @@ try:
                 if not (source/command).is_file() or not os.access(source/command, os.X_OK):
                     parser.error('Missing executable Arch helper: ' + str(source/command))
             plan.append(dict(kind='link', destination=str(destinations/'arch'), target=str(source)))
-        # apply removes omitted unchanged owned artifacts: never pass a partial plan.
+        # Software is not uninstalled by configuration deselection/helper-only runs.
+        # retain is an existing ownership-engine feature, not a competing plan.
+        apps = []
+        def source_root(value, files):
+            source = Path(value)
+            if not source.is_absolute() or str(source.resolve()) != value:
+                parser.error('Software roots must be actual absolute checkout paths.')
+            for file in files:
+                if not (source/file).is_file():
+                    parser.error('Missing public software entry file: ' + str(source/file))
+            return source
+        config, bin_home = Path(os.environ['XDG_CONFIG_HOME']), Path(os.environ['XDG_BIN_HOME'])
+        if args.dotvim_root:
+            source = source_root(args.dotvim_root, ('init.lua',))
+            apps += [(config/'dvim', source), (bin_home/'dvim', root/'shared/repositories.sh')]
+        if args.dotshell_root:
+            source = source_root(args.dotshell_root, ('shell.qml', 'bin/dshell'))
+            if not os.access(source/'bin/dshell', os.X_OK):
+                parser.error('dotshell/bin/dshell must be executable.')
+            apps += [(config/'dotshell', source), (bin_home/'dshell', source/'bin/dshell')]
+        if args.void_autotiling:
+            if os.environ['DOTSYS_PLATFORM'] != 'void':
+                parser.error('--void-autotiling requires Void.')
+            apps.append((bin_home/'autotiling-rs', root/'shared/repositories.sh'))
+        directories = set()
+        for destination, source in apps:
+            for parent in reversed(destination.parents):
+                if not parent.exists() and str(parent) not in directories:
+                    plan.append(dict(kind='directory', destination=str(parent), retain=True))
+                    directories.add(str(parent))
+            plan.append(dict(kind='link', destination=str(destination), target=str(source), retain=True))
+        # All category artifacts plus requested retained app artifacts use one owner.
         getattr(managed, args.action)(plan, 'dotsys', args.state_root, args.adopt, args.replace)
     elif args.action == 'remove':
         managed.remove('dotsys', args.state_root, args.path)
