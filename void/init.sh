@@ -11,8 +11,8 @@
 #
 # Turnstile does not manage XDG_RUNTIME_DIR in this arrangement; elogind does.
 #
-# Run as the desktop user (needs sudo). Assumes a base install produced by
-# the davelens/void repo (NetworkManager, dbus already enabled).
+# Run as the desktop user (asks for sudo once). Assumes a base install
+# produced by davelens/dotvoid (NetworkManager, dbus already enabled).
 set -e
 DOTSYS_REPO_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -21,6 +21,12 @@ if [ "$(id -u)" -eq 0 ]; then
   echo "individual system changes will ask for sudo when needed" >&2
   exit 1
 fi
+
+# Ask for sudo once, then keep the ticket alive so no later step prompts
+# (the prompt is invisible when output is piped, e.g. via `dots setup`).
+sudo -v
+while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+trap 'kill $! 2>/dev/null' EXIT
 
 "$DOTSYS_REPO_HOME/void/preflight.sh"
 "$DOTSYS_REPO_HOME/void/packages/init.sh"
