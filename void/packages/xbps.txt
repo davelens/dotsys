@@ -3,6 +3,7 @@ bash-language-server    # LSP server for Bash
 btop                    # Resource monitor
 cliphist                # Clipboard manager for Sway+rofi
 delta                   # Syntax-highlighting pager for git, diff, grep,...
+foot                    # Wayland terminal; sway's $term
 ImageMagick             # Image manipulation tools, v7+
 inetutils               # GNU network utilities
 less                    # Reads text files, one screen at a time
