@@ -9,6 +9,13 @@ echo "==> Installing elogind + turnstile session stack..."
 # per-user runit service tree that elogind does not provide.
 sudo xbps-install -Sy elogind turnstile lxqt-policykit
 
+# elogind ships the udev rules that attach GPUs and input devices to seat0.
+# Devices probed before those rules existed stay untagged until retriggered,
+# and greetd takes over VT1 at the end of this bootstrap without a reboot.
+sudo udevadm control --reload
+sudo udevadm trigger --action=add --subsystem-match=drm --subsystem-match=input
+sudo udevadm settle
+
 # elogind owns /run/user/$UID. Turnstile may export the path and shared D-Bus
 # address, but must not create or remove the runtime directory as well.
 if sudo grep -q '^[[:space:]]*manage_rundir[[:space:]]*=' /etc/turnstile/turnstiled.conf; then

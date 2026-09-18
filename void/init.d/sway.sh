@@ -34,6 +34,12 @@ fi
 
 export XDG_CURRENT_DESKTOP=sway
 
+# QEMU renders the hardware cursor plane upside down under virgl; fall back
+# to a software cursor on a virtio GPU.
+if [ -d /sys/module/virtio_gpu ]; then
+  export WLR_NO_HARDWARE_CURSORS=1
+fi
+
 # Let libseat select elogind's logind backend automatically.
 # Sway refuses to start on the proprietary NVIDIA driver without this flag.
 if lsmod | grep -q '^nvidia '; then
