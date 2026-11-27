@@ -3,7 +3,11 @@ set -e
 
 echo "==> Setting up WiFi (iwd + NetworkManager)..."
 
-sudo pacman -S --needed --noconfirm iwd networkmanager
+sudo pacman -S --needed --noconfirm iwd networkmanager wireless-regdb iw
+
+# Without a country the kernel uses the "world" regdomain: no 6 GHz and
+# restricted 5 GHz. A udev rule from wireless-regdb applies this at boot.
+sudo sed -i 's/^#\?WIRELESS_REGDOM="BE"/WIRELESS_REGDOM="BE"/' /etc/conf.d/wireless-regdom
 
 # Configure iwd to defer connection management to NetworkManager.
 sudo mkdir -p /etc/iwd
